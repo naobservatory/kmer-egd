@@ -1,7 +1,9 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
 #include <sys/errno.h>
 #include <unistd.h>
 #include "shm-common.h"
@@ -13,7 +15,8 @@ int main(int argc, char** argv) {
   }
   uint64_t n_buckets = strtoll(argv[1], NULL, 10);
 
-  int result = shm_open(SHM_NAME, O_RDWR | O_CREAT | O_EXCL);
+  int result = shm_open(SHM_NAME, O_RDWR | O_CREAT | O_EXCL,
+                        S_IRUSR | S_IWUSR);
   if (result < 0) {
     perror("Unable to open shared memory");
     exit(errno);

@@ -4,6 +4,7 @@
 #include "superfasthash.h"
 #include <sys/mman.h>
 #include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
 #include <sys/errno.h>
 #include <unistd.h>
 #include "shm-common.h"
@@ -25,7 +26,7 @@ char complement(char b) {
 }
 
 SHM_TYPE* open_shm(uint64_t n_buckets) {
-  int result = shm_open(SHM_NAME, O_RDWR);
+  int result = shm_open(SHM_NAME, O_RDWR, S_IRUSR | S_IWUSR);
   if (result < 0) {
     perror("Unable to open shared memory");
     exit(errno);
@@ -79,6 +80,14 @@ int main(int argc, char** argv) {
         uint64_t hash = kmer_hash < kmer_rc_hash ?
           (uint64_t)kmer_hash << 32 | kmer_rc_hash :
           (uint64_t)kmer_rc_hash << 32 | kmer_hash;
+
+        // TODO(jefftk) Since we're modifying the shared memory in multiple
+        // threads at once there's some possibilty of missing increments here.
+        // They should be pretty unlikely, however, since per-core cache is
+        // very small compared to the size of the array (10s of MB vs 10s of
+        // GB).  A few dropped increments is fine.  Since we're using aligned
+        // 32-bit integers on x86 I don't think there are worse things that
+        // might happen.  Read more about the best way to do this.
         SHM_TYPE val = buckets[hash % n_buckets];
         if (val < SHM_TYPE_MAX) {
           buckets[hash % n_buckets] = val + 1;
