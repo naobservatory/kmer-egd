@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include "superfasthash.h"
+#include <sys/mman.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/errno.h>
+#include <unistd.h>
+#include "shm-common.h"
 
 #define INITIAL 0
 #define GOT_AT 1
@@ -19,21 +24,36 @@ char complement(char b) {
   }
 }
 
+SHM_TYPE* open_shm(uint64_t n_buckets) {
+  int result = shm_open(SHM_NAME, O_RDWR);
+  if (result < 0) {
+    perror("Unable to open shared memory");
+    exit(errno);
+  }
+  int fd = result;
+  size_t len = n_buckets * sizeof(SHM_TYPE);
+  void* raw = mmap(0, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+  if (raw == MAP_FAILED) {
+    perror("Unable to mmap shared memory");
+    exit(errno);
+  }
+  return (SHM_TYPE*)raw;
+}
+
 int main(int argc, char** argv) {
   if (argc != 2) {
     printf("Usage: count-kmer-eqs N_BUCKETS\n");
     exit(1);
   }
   uint64_t n_buckets = strtoll(argv[1], NULL, 10);
-
+  SHM_TYPE* buckets = open_shm(n_buckets);
+  
   char b;
   int state = INITIAL;
   int seq_idx = 0;
 
   char kmer[K];
   char kmer_rc[K];
-
-  uint32_t* buckets = (uint32_t*)malloc(n_buckets * sizeof(uint32_t));
 
   while ((b = getchar_unlocked()) != EOF) {
     if (state == IN_SEQ && b != '\n' && b != '+') {
@@ -59,8 +79,8 @@ int main(int argc, char** argv) {
         uint64_t hash = kmer_hash < kmer_rc_hash ?
           (uint64_t)kmer_hash << 32 | kmer_rc_hash :
           (uint64_t)kmer_rc_hash << 32 | kmer_hash;
-        uint32_t val = buckets[hash % n_buckets];
-        if (val < 0xffffffff) {
+        SHM_TYPE val = buckets[hash % n_buckets];
+        if (val < SHM_TYPE_MAX) {
           buckets[hash % n_buckets] = val + 1;
         }
       }

@@ -1,2 +1,7 @@
 /target
 count-kmer-eqs
+close-shm
+open-shm
+read-shm
+\#*
+\.#*
