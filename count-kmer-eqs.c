@@ -1,7 +1,7 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "superfasthash.h"
 #include <sys/mman.h>
 #include <fcntl.h>           /* For O_* constants */
 #include <sys/stat.h>        /* For mode constants */
@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include "util.h"
 #include "shm-common.h"
+#include "superfasthash.h"
 
 SHM_TYPE* open_shm(uint64_t n_buckets) {
   int result = shm_open(SHM_NAME, O_RDWR, S_IRUSR | S_IWUSR);
@@ -31,10 +32,10 @@ struct data_t {
   SHM_TYPE* buckets;
 };
 
-void handle_kmers(char* kmer, char* kmer_rc, void* data_void) {
+void handle_kmers(char* circular_buffer, int offset, void* data_void) {
   struct data_t* data = (struct data_t*)data_void;
 
-  uint64_t hash = rc_agnostic_hash(kmer, kmer_rc);
+  uint64_t hash = HashGenomicCircularBuffer(circular_buffer, offset);
 
   // TODO(jefftk) Since we're modifying the shared memory in multiple threads
   // at once there's some possibilty of missing increments here.  They should
