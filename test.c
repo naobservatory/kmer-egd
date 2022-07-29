@@ -3,13 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "superfasthash.h"
-#include <sys/mman.h>
-#include <fcntl.h>           /* For O_* constants */
-#include <sys/stat.h>        /* For mode constants */
 #include <sys/errno.h>
 #include <unistd.h>
-#include <stdbool.h>
 #include "util.h"
 
 struct data_t {

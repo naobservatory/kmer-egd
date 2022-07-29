@@ -1,8 +1,11 @@
-/target
 count-kmer-eqs
-close-shm
 open-shm
+close-shm
 read-shm
 shm-hist
+shm-examples
+extract-kmers
+test
+/target
 \#*
 \.#*

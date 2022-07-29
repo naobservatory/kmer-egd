@@ -1,6 +1,10 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <stdint.h>
+#include <stdio.h>
+#include "superfasthash.h"
+
 #define K 40
 #define K_STR "40"
 
