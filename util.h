@@ -48,10 +48,11 @@ void iterate_kmers(kmer_handler_t kmer_handler, void* data) {
     if (state == IN_SEQ && b != '\n' && b != '+') {
       if (seq_idx < K) {
         kmer[seq_idx] = b;
+        kmer_rc[K-seq_idx-1] = b;
       } else {
         for (int i = 1; i < K; i++) {
           kmer[i-1] = kmer[i];
-          kmer_rc[i] = kmer_rc[i-1];
+          kmer_rc[K-i] = kmer_rc[K-i-1];
         }
         kmer[K-1] = b;
         kmer_rc[0] = complement(b);
