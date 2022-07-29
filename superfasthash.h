@@ -1,4 +1,4 @@
-// Copyright (c) 2010, Paul Hsieh
+]// Copyright (c) 2010, Paul Hsieh
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,8 @@
 #endif
 
 uint32_t SuperFastHash (const char * data, int len) {
-uint32_t hash = (uint32_t)len, tmp;
-int rem;
+    uint32_t hash = (uint32_t)len, tmp;
+    int rem;
 
     if (len <= 0 || data == NULL) return 0;
 
