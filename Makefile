@@ -1,7 +1,11 @@
-all: count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples extract-kmers
+all: count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples \
+  extract-kmers test
 
 count-kmer-eqs: count-kmer-eqs.c superfasthash.h util.h
 	gcc count-kmer-eqs.c -O3 -o count-kmer-eqs -Wall -lrt
+
+test: test.c superfasthash.h util.h
+	gcc test.c -O3 -o test -Wall
 
 extract-kmers: extract-kmers.c superfasthash.h util.h
 	gcc extract-kmers.c -O3 -o extract-kmers -Wall

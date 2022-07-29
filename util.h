@@ -14,6 +14,7 @@ char complement(char b) {
   case 'C': return 'G';
   case 'G': return 'C';
   case 'T': return 'A';
+  case 'N': return 'N';
   default: return ' ';
   }
 }
@@ -46,17 +47,14 @@ void iterate_kmers(kmer_handler_t kmer_handler, void* data) {
 
   while ((b = getchar_unlocked()) != EOF) {
     if (state == IN_SEQ && b != '\n' && b != '+') {
-      if (seq_idx < K) {
-        kmer[seq_idx] = b;
-        kmer_rc[K-seq_idx-1] = b;
-      } else {
-        for (int i = 1; i < K; i++) {
-          kmer[i-1] = kmer[i];
-          kmer_rc[K-i] = kmer_rc[K-i-1];
-        }
-        kmer[K-1] = b;
-        kmer_rc[0] = complement(b);
+      for (int i = 1; i < K; i++) {
+        kmer[i-1] = kmer[i];
+        kmer_rc[K-i] = kmer_rc[K-i-1];
+      }
+      kmer_rc[0] = complement(b);
+      kmer[K-1] = b;
 
+      if (seq_idx >= K-1) {
         kmer_handler(kmer, kmer_rc, data);
       }
       seq_idx++;
