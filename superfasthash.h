@@ -1,4 +1,4 @@
-// Copyright (c) 2010, Paul Hsieh
+]// Copyright (c) 2010, Paul Hsieh
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 #define SUPER_FAST_HASH_H
 
 #include <stdint.h>
-
+#include <stdlib.h>
 #undef get16bits
 #if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
   || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
@@ -88,75 +88,6 @@ uint32_t SuperFastHash (const char * data, int len) {
     hash += hash >> 6;
 
     return hash;
-}
-
-#define to16bits(a,b) (((uint32_t)(a) << 8) + (uint32_t)(b))
-
-char complement(char b) {
-  switch (b) {
-  case 'A': return 'T';
-  case 'C': return 'G';
-  case 'G': return 'C';
-  case 'T': return 'A';
-  default: return ' ';
-  }
-}
-
-// Compute a hash of the range from offset to offset-1, wrapping at K.  The
-// hash should be identical for a sequence and its reverse complement.  The
-// value for K must be a multiple of 4.
-uint64_t HashGenomicCircularBuffer(const char* cb, uint32_t offset) {
-  uint32_t hash_f = K;
-  uint32_t hash_r = K;
-  uint32_t tmp_f;
-  uint32_t tmp_r;
-
-  /* Main loop */
-  for (int i = 0 ; i < (K >> 2); i++) {
-    char location_f1 = cb[(offset + i*4 + 0) % K];
-    char location_f2 = cb[(offset + i*4 + 1) % K];
-    char location_f3 = cb[(offset + i*4 + 2) % K];
-    char location_f4 = cb[(offset + i*4 + 3) % K];
-      
-    hash_f  += to16bits(location_f1, location_f2);
-    tmp_f    = (uint32_t)(to16bits(location_f3, location_f4) << 11) ^ hash_f;
-    hash_f   = (hash_f << 16) ^ tmp_f;
-    hash_f  += hash_f >> 11;
-
-    char location_r1 = complement(cb[(K + offset - i*4 - 1) % K]);
-    char location_r2 = complement(cb[(K + offset - i*4 - 2) % K]);
-    char location_r3 = complement(cb[(K + offset - i*4 - 3) % K]);
-    char location_r4 = complement(cb[(K + offset - i*4 - 4) % K]);
-      
-    hash_r  += to16bits(location_r1, location_r2);
-    tmp_r    = (uint32_t)(to16bits(location_r3, location_r4) << 11) ^ hash_r;
-    hash_r   = (hash_r << 16) ^ tmp_r;
-    hash_r  += hash_r >> 11;
-  }
-  
-  // SuperFastHash switches K & 3 here, but we choose K to be a multiple of 4
-  // and ensure that this isn't required.
-  
-  /* Force "avalanching" of final 127 bits */
-  hash_f ^= hash_f << 3;
-  hash_f += hash_f >> 5;
-  hash_f ^= hash_f << 4;
-  hash_f += hash_f >> 17;
-  hash_f ^= hash_f << 25;
-  hash_f += hash_f >> 6;
-
-  hash_r ^= hash_r << 3;
-  hash_r += hash_r >> 5;
-  hash_r ^= hash_r << 4;
-  hash_r += hash_r >> 17;
-  hash_r ^= hash_r << 25;
-  hash_r += hash_r >> 6;
-
-  if (hash_f < hash_r) {
-    return (uint64_t)hash_f << 32 | hash_r;
-  } else {
-    return (uint64_t)hash_r << 32 | hash_f;
-  }
 }
 
 #endif // SUPER_FAST_HASH_H
