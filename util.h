@@ -51,11 +51,10 @@ void iterate_kmers(kmer_handler_t kmer_handler, void* data) {
       } else {
         for (int i = 1; i < K; i++) {
           kmer[i-1] = kmer[i];
+          kmer_rc[i] = kmer_rc[i-1];
         }
         kmer[K-1] = b;
-        for (int i = 0; i < K; i++) {
-          kmer_rc[i] = complement(kmer[K-1-i]);
-        }
+        kmer_rc[0] = complement(b);
 
         kmer_handler(kmer, kmer_rc, data);
       }
