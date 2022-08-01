@@ -36,17 +36,14 @@ void handle_kmers(char* kmer, char* kmer_rc, void* data_void) {
 
   uint64_t hash = rc_agnostic_hash(kmer, kmer_rc);
 
-  // TODO(jefftk) Since we're modifying the shared memory in multiple threads
-  // at once there's some possibilty of missing increments here.  They should
-  // be pretty unlikely, however, since per-core cache is very small compared
-  // to the size of the array (10s of MB vs 10s of GB).  A few dropped
-  // increments is fine.  Since we're using aligned 32-bit integers on x86 I
-  // don't think there are worse things that might happen.  Read more about the
-  // best way to do this.
   uint64_t idx = hash % data->n_buckets;
-  SHM_TYPE val = data->buckets[idx];
+  SHM_TYPE* bucket_ptr = &(data->buckets[idx]);
+  SHM_TYPE val = __atomic_load_n(bucket_ptr, __ATOMIC_RELAXED);
   if (val < SHM_TYPE_MAX) {
-    data->buckets[idx] = val + 1;
+    // A dropped write is possible here if another CPU is trying to increment
+    // this bucket at the same time.  Very unlikely, though, since we have so
+    // many buckets.  And we're somewhat robust to dropped writes.
+    __atomic_store_n(bucket_ptr, val + 1, __ATOMIC_RELAXED);
   }
 }
 
