@@ -10,8 +10,8 @@
 #include "util.h"
 #include "shm-common.h"
 
-SHM_TYPE* open_shm(uint64_t n_buckets) {
-  int result = shm_open(SHM_NAME, O_RDWR, S_IRUSR | S_IWUSR);
+SHM_TYPE* open_shm(const char* shm_name, uint64_t n_buckets) {
+  int result = shm_open(shm_name, O_RDWR, S_IRUSR | S_IWUSR);
   if (result < 0) {
     perror("Unable to open shared memory");
     exit(errno);
@@ -48,14 +48,14 @@ void handle_kmers(char* kmer, char* kmer_rc, void* data_void) {
 }
 
 int main(int argc, char** argv) {
-  if (argc != 2) {
-    printf("Usage: count-kmer-eqs N_BUCKETS\n");
+  if (argc != 3) {
+    printf("Usage: count-kmer-eqs shm_name N_BUCKETS\n");
     exit(1);
   }
-
+  const char* shm_name = argv[1];
   struct data_t data;
-  data.n_buckets = strtoll(argv[1], NULL, 10);
-  data.buckets = open_shm(data.n_buckets);
+  data.n_buckets = strtoll(argv[2], NULL, 10);
+  data.buckets = open_shm(shm_name, data.n_buckets);
 
   iterate_kmers(handle_kmers, (void*)&data);  
 }

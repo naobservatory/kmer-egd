@@ -8,14 +8,15 @@
 #include "shm-common.h"
 
 int main(int argc, char** argv) {
-  if (argc != 3) {
-    printf("Usage: read-shm n_buckets bucket\n");
+  if (argc != 4) {
+    printf("Usage: read-shm shm_name n_buckets bucket\n");
     exit(1);
   }
-  uint64_t n_buckets = strtoll(argv[1], NULL, 10);
-  uint64_t bucket = strtoll(argv[2], NULL, 10);
+  const char* shm_name = argv[1];
+  uint64_t n_buckets = strtoll(argv[2], NULL, 10);
+  uint64_t bucket = strtoll(argv[3], NULL, 10);
 
-  int result = shm_open(SHM_NAME, O_RDONLY, S_IRUSR);
+  int result = shm_open(shm_name, O_RDONLY, S_IRUSR);
   if (result < 0) {
     perror("Unable to open shared memory");
     exit(errno);
@@ -31,5 +32,5 @@ int main(int argc, char** argv) {
   }
 
   SHM_TYPE* region = (SHM_TYPE*)raw;
-  printf("%s[%lu] = %u\n", SHM_NAME, bucket, region[bucket]);
+  printf("%s[%lu] = %u\n", shm_name, bucket, region[bucket]);
 }
