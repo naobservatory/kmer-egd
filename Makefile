@@ -1,7 +1,7 @@
-CFLAGS=-O3 -Wall -lrt
+CFLAGS=-O3 -Wall -lrt -lm
 CC=gcc
 OUTPUTS=count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples \
-  extract-kmers test
+  extract-kmers test shm-egd
 TARGETS=$(OUTPUTS) .gitignore
 
 all: $(TARGETS)
@@ -21,6 +21,8 @@ read-shm: read-shm.c shm-common.h
 shm-hist: shm-hist.c shm-common.h
 
 shm-examples: shm-examples.c shm-common.h
+
+shm-egd: shm-egd.c shm-common.h
 
 .gitignore:
 	echo $(OUTPUTS) | tr ' ' '\n' > .gitignore
