@@ -1,7 +1,7 @@
 CFLAGS=-O3 -Wall -lrt -lm
 CC=gcc
 OUTPUTS=count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples \
-  extract-kmers test shm-egd
+  extract-kmers test shm-egd shm-dump-all
 TARGETS=$(OUTPUTS) .gitignore
 
 all: $(TARGETS)
@@ -24,11 +24,15 @@ shm-examples: shm-examples.c shm-common.h
 
 shm-egd: shm-egd.c shm-common.h
 
+shm-dump-all: shm-dump-all.c
+
 .gitignore:
 	echo $(OUTPUTS) | tr ' ' '\n' > .gitignore
 	echo /target >> .gitignore
 	echo '\#*' >>  .gitignore
 	echo '\.#*' >>  .gitignore
+	echo "bucket-evaluations*.tsv" >> .gitignore
+	echo "prjna729801.fnames.partitioned" >> .gitignore
 
 .PHONY: clean
 

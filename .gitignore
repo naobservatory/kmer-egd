@@ -6,6 +6,10 @@ shm-hist
 shm-examples
 extract-kmers
 test
+shm-egd
+shm-dump-all
 /target
 \#*
 \.#*
+bucket-evaluations*.tsv
+prjna729801.fnames.partitioned
