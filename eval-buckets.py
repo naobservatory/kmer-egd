@@ -7,13 +7,15 @@ def start():
     #sums = None
     days = None
     for line in sys.stdin:
+        line = line.strip()
+        
         #if not sums:
-        #    _, *sums = line.strip().split('\t')
+        #    _, *sums = line.split('\t')
         #    sums = [int(x) for x in sums]
         #    days = [[day] for day in range(len(sums))]
         #    continue
 
-        bucket, *vals = line.strip().split('\t')
+        bucket, *vals = line.split('\t')
         vals = [int(x) for x in vals]
 
         # Not worth running regression if we have too little data
@@ -27,10 +29,10 @@ def start():
 
         # TODO: adjust by sums
         clf.fit(days, vals)
-        print("%s\t%s\t%s" % (
+        print("%.5f\t%.5f\t%s" % (
             clf.coef_[0],
             clf.score(days, vals),
-            bucket))
+            line))
 
 
 if __name__ == "__main__":
