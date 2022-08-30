@@ -16,11 +16,15 @@ def start():
         bucket, *vals = line.strip().split('\t')
         vals = [int(x) for x in vals]
 
+        # Not worth running regression if we have too little data
+        if sum(vals) < 20:
+            continue
+
         if not days:
             days = [[day] for day in range(len(vals))]
-        
+
         #print(repr(vals))
-        
+
         # TODO: adjust by sums
         clf.fit(days, vals)
         print("%s\t%s\t%s" % (
