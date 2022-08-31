@@ -6,5 +6,5 @@ aws s3 ls s3://prjna729801/ | \
     while read fname; do
         echo -n " <(aws s3 cp s3://prjna729801/$fname - | gunzip)"
     done
-
+echo
 # ./merge-counts.sh > tmp.merge-counts.sh && bash tmp.merge-counts.sh
