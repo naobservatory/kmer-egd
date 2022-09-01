@@ -8,6 +8,7 @@ extract-kmers
 test
 shm-egd
 shm-dump-all
+trie-count
 /target
 \#*
 \.#*
