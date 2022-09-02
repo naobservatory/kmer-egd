@@ -33,6 +33,7 @@ trie-count: trie-count.c
 	echo /target >> .gitignore
 	echo '\#*' >>  .gitignore
 	echo '\.#*' >>  .gitignore
+	echo '*.tsv' >>  .gitignore
 	echo "bucket-evaluations*.tsv" >> .gitignore
 	echo "prjna729801.fnames.partitioned" >> .gitignore
 

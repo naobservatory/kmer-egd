@@ -12,5 +12,6 @@ trie-count
 /target
 \#*
 \.#*
+*.tsv
 bucket-evaluations*.tsv
 prjna729801.fnames.partitioned
