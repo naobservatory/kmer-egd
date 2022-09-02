@@ -9,12 +9,13 @@ K = 40
 qualities_choices = ['F', ':', ',', '#']
 numeric_qualities = [10**(-.1*(ord(x)-33)) for x in qualities_choices]
 
-def simulate_error(base, quality_weights):
-    chance_incorrect, = random.choices(
-        numeric_qualities, weights=quality_weights, k=1)
-    if random.random() > chance_incorrect:
-        return base
-    return random.choice(list(set('ACTG')-set(base)))
+def simulate_error(pos_quality_weights):
+    for quality_weights in pos_quality_weights:
+        chance_incorrect, = random.choices(
+            numeric_qualities, weights=quality_weights, k=1)
+        if random.random() < chance_incorrect:
+            return True
+    return False
 
 def start(genome_fname, qualities_fname, *read_counts):
     read_counts = [int(x) for x in read_counts]
@@ -40,14 +41,12 @@ def start(genome_fname, qualities_fname, *read_counts):
         for i in range(read_count):
             read_pos = random.randint(0, len(sequence) - read_length)
             read = sequence[read_pos : read_pos+read_length]
-            
-            errored_read = ''.join([
-                simulate_error(base, quality_weights)
-                for (base, quality_weights)
-                in zip(read, pos_quality_weights)])
+
+            if simulate_error(pos_quality_weights):
+                continue
             
             for i in range(len(read) - K):
-                kmers[errored_read[i:i+K]][n_day] += 1
+                kmers[read[i:i+K]][n_day] += 1
 
     for kmer, counts in sorted(kmers.items()):
         if sum(counts) < 10:
