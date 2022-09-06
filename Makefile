@@ -1,4 +1,4 @@
-CFLAGS=-O3 -Wall -lrt -lm
+CFLAGS=-O3 -Wall -lrt -lm -Werror
 CC=gcc
 OUTPUTS=count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples \
   extract-kmers test shm-egd shm-dump-all trie-count
@@ -38,6 +38,8 @@ trie-count: trie-count.c
 	echo "prjna729801.fnames.partitioned" >> .gitignore
 
 .PHONY: clean
+
+.DELETE_ON_ERROR:
 
 clean:
 	rm -f $(TARGETS)

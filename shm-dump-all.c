@@ -9,60 +9,68 @@
 #include <math.h>
 #include "shm-common.h"
 
-#define PRE_SHM_ARGS 4
-
 int main(int argc, char** argv) {
-  int n_days = argc-PRE_SHM_ARGS;
-  if (n_days < 1) {
-    printf("Usage: shm-dump-all n_buckets bucket_mods bucket_mod shm_names...\n");
+  if (argc != 4) {
+    printf("Usage: shm-dump-all n_bytes shm_name n_days\n");
     exit(1);
   }
-  uint64_t n_buckets_per_shm = strtoll(argv[1], NULL, 10);
-  uint64_t bucket_mods = strtoll(argv[2], NULL, 10);
-  uint64_t bucket_mod = strtoll(argv[3], NULL, 10);
-  SHM_TYPE* days[n_days];
+  uint64_t n_bytes = strtoll(argv[1], NULL, 10);
+  uint64_t n_days = strtoll(argv[3], NULL, 10);
+  uint64_t n_buckets = get_n_buckets_or_die(n_bytes, n_days);
 
-  for (int day = 0; day < n_days; day++) {
-    const char* shm_name = argv[day + PRE_SHM_ARGS];
-    int result = shm_open(shm_name, O_RDONLY, S_IRUSR);
-    if (result < 0) {
-      printf("With %s:", shm_name);
-      perror("Unable to open shared memory");
-      exit(errno);
-    }
-    int fd = result;
-    
-    size_t len = n_buckets_per_shm * sizeof(SHM_TYPE);
-
-    void* raw = mmap(0, len, PROT_READ, MAP_SHARED, fd, 0);
-    if (raw == MAP_FAILED) {
-      perror("Unable to mmap shared memory");
-      exit(errno);
-    }
-
-    days[day] = (SHM_TYPE*)raw;
+  SHM_TYPE* shm;
+  
+  const char* shm_name = argv[2];
+  int result = shm_open(shm_name, O_RDONLY, S_IRUSR);
+  //int result = shm_open(shm_name, O_RDWR, S_IRUSR);
+  if (result < 0) {
+    printf("With %s:", shm_name);
+    perror("Unable to open shared memory");
+    exit(errno);
+  }
+  int fd = result;
+  
+  void* raw = mmap(0, n_bytes, PROT_READ, MAP_SHARED, fd, 0);
+  //void* raw = mmap(0, n_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+  if (raw == MAP_FAILED) {
+    perror("Unable to mmap shared memory");
+    exit(errno);
   }
 
+  shm = (SHM_TYPE*)raw;
+
+  /*
+  printf("setting!\n");
+  for (uint64_t bucket = 0; bucket < n_buckets; bucket++) {
+    for (uint64_t day = 0; day < n_days; day++) {
+      shm[shm_idx(bucket, day, n_days)] = 1;
+    }
+  }
+  printf("set!\n");
+  return 0; 
+  */
+
+  /*
   uint64_t sums[n_days];
-  for (int day = 0; day < n_days; day++) {
-    sums[day] = 0;
-    for (int bucket = 0; bucket < n_buckets_per_shm; bucket++) {
-      sums[day] += days[day][bucket];
+  for (uint64_t day = 0; day < n_days; day++) sums[day] = 0;
+        
+  for (uint64_t bucket = 0; bucket < n_buckets; bucket++) {
+    for (uint64_t day = 0; day < n_days; day++) {
+      sums[day] += shm[shm_idx(bucket, day, n_days)];
     }
   }
 
   printf("sums");
-  for (int day = 0; day < n_days; day++) {
+  for (uint64_t day = 0; day < n_days; day++) {
     printf("\t%lu", sums[day]);
   }
   printf("\n");
-
-  for (int bucket = 0; bucket < n_buckets_per_shm; bucket++) {
-    if (bucket % bucket_mods != bucket_mod) continue;
-    
-    printf("%d", bucket);
-    for (int day = 0; day < n_days; day++) {
-      printf("\t%u", days[day][bucket]);
+  */
+  
+  for (uint64_t bucket = 0; bucket < n_buckets; bucket++) {
+    printf("%lu", bucket);
+    for (uint64_t day = 0; day < n_days; day++) {
+      printf("\t%u", shm[shm_idx(bucket, day, n_days)]);
     }
     printf("\n");
   }

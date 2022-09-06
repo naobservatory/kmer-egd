@@ -10,11 +10,11 @@
 
 int main(int argc, char** argv) {
   if (argc != 3) {
-    printf("Usage: open-shm name N_BUCKETS\n");
+    printf("Usage: open-shm name n_bytes\n");
     exit(1);
   }
   const char* shm_name = argv[1];
-  uint64_t n_buckets = strtoll(argv[2], NULL, 10);
+  uint64_t n_bytes = strtoll(argv[2], NULL, 10);
 
   int result = shm_open(shm_name, O_RDWR | O_CREAT | O_EXCL,
                         S_IRUSR | S_IWUSR);
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   }
   int fd = result;
 
-  size_t len = n_buckets * sizeof(SHM_TYPE);
+  size_t len = n_bytes;
   result = ftruncate(fd, len);
   if (result < 0) {
     perror("Unable to size shared memory");

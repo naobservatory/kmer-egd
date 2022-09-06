@@ -39,15 +39,20 @@ uint32_t rc_agnostic_hash(char* kmer, char* kmer_rc) {
 }
 
 // kmer and kmer_rc are both K long
-typedef void (*kmer_handler_t)(char* kmer, char* kmer_rc, void *data);
+typedef void (*kmer_handler_t)(uint64_t read_index,
+                               char* kmer,
+                               char* kmer_rc,
+                               void *data);
 
 void iterate_kmers(kmer_handler_t kmer_handler, void* data) {
   char b;
   int state = INITIAL;
-  int seq_idx = 0;
+  int seq_index = 0;
 
   char kmer[K];
   char kmer_rc[K];
+
+  uint64_t read_index = 0;
 
   while ((b = getchar_unlocked()) != EOF) {
     if (state == IN_SEQ && b != '\n' && b != '+') {
@@ -58,19 +63,25 @@ void iterate_kmers(kmer_handler_t kmer_handler, void* data) {
       kmer_rc[0] = complement(b);
       kmer[K-1] = b;
 
-      if (seq_idx >= K-1) {
-        kmer_handler(kmer, kmer_rc, data);
+      if (seq_index >= K-1) {
+        kmer_handler(read_index, kmer, kmer_rc, data);
       }
-      seq_idx++;
+      seq_index++;
     }
 
     if (state == INITIAL && b == '@') {
       state = GOT_AT;
     } else if (state == GOT_AT && b == '\n') {
       state = IN_SEQ;
-      seq_idx = 0;
+      seq_index = 0;
     } else if (state == IN_SEQ && b == '+') {
       state = INITIAL;
+      /*
+      if (read_index % 10000 == 0) {
+        printf("Finished read %lu\n", read_index);
+      }
+      */
+      read_index++;
     }
   }
 }
