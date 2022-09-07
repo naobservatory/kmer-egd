@@ -1,16 +1,16 @@
 #!/bin/bash
 
-N_BUCKETS=80000000
+# Total memory ~256GB, but apparently 124GB is the most we can use
+N_BYTES=130386585560
 
-cat prjna729801.fnames | cat -n | \
-    while read n fname ; do
-        echo $fname $(expr $n % 18)
-    done  > prjna729801.fnames.partitioned
+SHM=shm
 
-for i in {0..17}; do
-    ./close-shm shm-$i
-    ./open-shm shm-$i $N_BUCKETS
-done
+N_DAYS=14
+N_MODS=1
+MOD=0
 
-time cat prjna729801.fnames.partitioned | \
-    xargs -P 32 -I {} ./download-and-c.sh {} $N_BUCKETS
+./close-shm $SHM > /dev/null || true
+./open-shm $SHM $N_BYTES
+
+time cat prjna729801.fnames | \
+    xargs -P 32 -I {} ./download-and-c.sh {} $N_BYTES $SHM $N_DAYS $N_MODS $MOD

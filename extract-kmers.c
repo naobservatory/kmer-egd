@@ -15,7 +15,7 @@ struct data_t {
   int n_targets;
 };
 
-void handle_kmers(char* kmer, char* kmer_rc, void* data_void) {
+void handle_kmers(uint64_t day, char* kmer, char* kmer_rc, void* data_void) {
   struct data_t* data = (struct data_t*)data_void;
 
   uint64_t hash = rc_agnostic_hash(kmer, kmer_rc);
