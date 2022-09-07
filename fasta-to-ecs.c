@@ -44,8 +44,7 @@ int main(int argc, char** argv) {
     if (seq_idx >= K-1) {
       uint64_t hash = rc_agnostic_hash(kmer, kmer_rc);
       uint64_t bucket = hash % n_buckets;
-      //printf("%." K_STR "s\t%lu\n", kmer, bucket);
-      printf("%lu\n", bucket);
+      printf("%." K_STR "s\t%lu\n", kmer, bucket);
     }
     
     seq_idx++;
