@@ -9,12 +9,6 @@ FINISHED=$(aws s3 ls s3://prjna729801/ | \
 for fname in $READY; do
     if ! [[ "$FINISHED" =~ "$fname" ]]; then
         echo "$fname"
-        time aws s3 cp "s3://prjna729801/$fname" - | \
-            gunzip | \
-            python3 eval-buckets.py | \
-            awk '{print $1"\t"$2"\t"$3}' | \
-            sort -n | \
-            gzip | \
-            aws s3 cp - "s3://prjna729801/${fname/.tsv.gz/-poisson.tsv.gz}"
+        ./score-trie-output-single.sh "$fname"
     fi
 done
