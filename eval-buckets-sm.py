@@ -7,7 +7,13 @@ def start():
     #for line in [
     #    "AAGAAGAGCAACAAGAAGAGCAACAAGAAGAGCAACAAGA "
     #    "0 0 0 0 0 0 0 0 5 5 0 1 5 7".replace(" ", "\t")]:
-    for line in sys.stdin:
+
+    if len(sys.argv) > 1:
+        data = ["\t".join(sys.argv[1:])]
+    else:
+        data = sys.stdin
+    
+    for line in data:
         line = line.strip()
         
         bucket, *vals = line.split('\t')
@@ -37,12 +43,23 @@ def start():
         if coef < 0:
             continue
         
-        print("%.6f\t%.3f\t%.3f\t%.3f\t%s" % (
+        #print("%.2E\t%.3f\t%.3f\t%.3f\t%s" % (
+        #    pvalue,
+        #    coef,
+        #    ci_025,
+        #    ci_width,
+        #    line))
+
+        print("%s\t%.1f%%\t%.1f%%\t%.2E\t%.3f" % (
+            " ".join(str(x) for x in vals),
+            coef*100,
+            ci_025*100,
             pvalue,
-            coef,
-            ci_025,
-            ci_width,
-            line))
+            coef/ci_width))
+
+        if len(sys.argv) > 1:
+            import code
+            code.interact(local=locals())
 
 if __name__ == "__main__":
     start()
