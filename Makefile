@@ -1,7 +1,8 @@
 CFLAGS=-O3 -Wall -lrt -lm -Werror
 CC=gcc
 OUTPUTS=count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples \
-  extract-kmers test shm-egd shm-dump-all trie-count fasta-to-ecs
+  extract-kmers test shm-egd shm-dump-all trie-count fasta-to-ecs hash-count \
+  ska-hash-count
 TARGETS=$(OUTPUTS) .gitignore
 
 all: $(TARGETS)
@@ -28,6 +29,10 @@ shm-dump-all: shm-dump-all.c
 
 trie-count: trie-count.c
 
+hash-count: hash-count.cpp
+
+ska-hash-count: ska-hash-count.cpp
+
 fasta-to-ecs: fasta-to-ecs.c
 
 .gitignore:
@@ -36,6 +41,7 @@ fasta-to-ecs: fasta-to-ecs.c
 	echo '\#*' >>  .gitignore
 	echo '\.#*' >>  .gitignore
 	echo '*.tsv' >>  .gitignore
+	echo '*tmp.*' >>  .gitignore
 	echo "bucket-evaluations*.tsv" >> .gitignore
 	echo "prjna729801.fnames.partitioned" >> .gitignore
 

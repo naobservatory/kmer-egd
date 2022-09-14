@@ -9,9 +9,13 @@ test
 shm-egd
 shm-dump-all
 trie-count
+fasta-to-ecs
+hash-count
+ska-hash-count
 /target
 \#*
 \.#*
 *.tsv
+*tmp.*
 bucket-evaluations*.tsv
 prjna729801.fnames.partitioned
