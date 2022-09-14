@@ -102,6 +102,22 @@ void print_trie(struct TrieNode* node, int depth, char kmer[K]) {
   }
 }
 
+void determine_fullness(struct TrieNode* node, int depth,
+                        uint64_t* inner_nodes, uint64_t* leaf_nodes) {
+  if (node == NULL) {
+    return;
+  }
+  if (depth == K) {
+    (*leaf_nodes)++;
+  } else {
+    (*inner_nodes)++;
+    determine_fullness(node->A, depth+1, inner_nodes, leaf_nodes);
+    determine_fullness(node->C, depth+1, inner_nodes, leaf_nodes);
+    determine_fullness(node->G, depth+1, inner_nodes, leaf_nodes);
+    determine_fullness(node->T, depth+1, inner_nodes, leaf_nodes);
+  }
+}
+
 int main(int argc, char** argv) {
   if (argc != 3) {
     fprintf(stderr, "usage: %s kmer_include kmer_exclude\n", argv[0]);
@@ -159,4 +175,9 @@ int main(int argc, char** argv) {
 
   char kmer[K];
   print_trie(root, /*depth=*/0, kmer);
+
+  //uint64_t inner_nodes = 0;
+  //uint64_t leaf_nodes = 0;
+  //determine_fullness(root, /*depth=*/0, &inner_nodes, &leaf_nodes);
+  //printf("%lu %lu\n", inner_nodes, leaf_nodes); // 364591541 19384822
 }
