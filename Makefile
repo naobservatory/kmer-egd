@@ -2,7 +2,7 @@ CFLAGS=-O3 -Wall -lrt -lm -Werror
 CC=gcc
 OUTPUTS=count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples \
   extract-kmers test shm-egd shm-dump-all trie-count fasta-to-ecs hash-count \
-  ska-hash-count
+  ska-hash-count hash-count-variable
 TARGETS=$(OUTPUTS) .gitignore
 
 all: $(TARGETS)
@@ -30,6 +30,8 @@ shm-dump-all: shm-dump-all.c
 trie-count: trie-count.c
 
 hash-count: hash-count.cpp
+
+hash-count-variable: hash-count-variable.cpp
 
 ska-hash-count: ska-hash-count.cpp
 
