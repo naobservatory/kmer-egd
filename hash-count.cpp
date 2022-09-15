@@ -5,24 +5,68 @@
 #include <unordered_map>
 #include "superfasthash.h"
 
-#define K 40
+#define K_4 10
+#define K (K_4*4)
 #define K_STR "40"
 
 #define MAX_READ_LENGTH 151
 #define DAYS 14
 
+#define A 0
+#define C 1
+#define G 2
+#define T 3
+
 // TODO: use char[K/4] and pack them in with shifting
 typedef std::array<char, K> KMer;
+typedef std::array<unsigned char, K_4> PackedKMer;
+
+unsigned char base_to_enum(char base) {
+  switch (base) {
+  case 'A': return A;
+  case 'C': return C;
+  case 'T': return T;
+  default: return G;
+  }
+}
+
+char enum_to_base(unsigned char base_enum) {
+  switch (base_enum & 0b00000011) {
+  case A: return 'A';
+  case C: return 'C';
+  case T: return 'T';
+  default: return 'G';
+  }
+}
+
+wvoid pack_kmer(const KMer& in, PackedKMer& out) {
+  for (int i = 0 ; i < K_4; i++) {
+    out[i] =
+      base_to_enum(in[i*4]) +
+      (base_to_enum(in[i*4 + 1]) << 2) +
+      (base_to_enum(in[i*4 + 2]) << 4) +
+      (base_to_enum(in[i*4 + 3]) << 6);
+  }
+}
+
+void unpack_kmer(const PackedKMer& in, KMer& out) {
+  for (int i = 0 ; i < K_4; i++) {
+    out[i*4] = enum_to_base(in[i]);
+    out[i*4 + 1] = enum_to_base(in[i] >> 2);
+    out[i*4 + 2] = enum_to_base(in[i] >> 4);
+    out[i*4 + 3] = enum_to_base(in[i] >> 6);
+  }
+}
 
 namespace std {
-  template <> struct hash<KMer> {
-    std::size_t operator()(const KMer& k) const {
-      return SuperFastHash(k.data(), K);
+  template <> struct hash<PackedKMer> {
+    std::size_t operator()(const PackedKMer& pk) const {
+      return SuperFastHash((const char*)pk.data(), K_4);
     }
   };
 }
 
-typedef std::unordered_map<KMer, std::array<uint32_t, DAYS>> Map;
+typedef std::unordered_map<PackedKMer, std::array<uint32_t, DAYS>> Map;
 
 void handle_read(char* read, int read_len, int day, Map& map,
                  char* kmer_include, char* kmer_exclude) {
@@ -44,12 +88,24 @@ void handle_read(char* read, int read_len, int day, Map& map,
     if (strncmp(read + i, kmer_include, K) < 0) continue;
     if (strncmp(read + i, kmer_exclude, K) >= 0) continue;
 
+    bool skip = false;
+
     KMer kmer;
     for (int j = 0; j < K; j++) {
+      char c = read[i + j];
+      if (c != 'A' && c != 'C' && c != 'G' && c != 'T') {
+        skip = true;
+        break;
+      }
       kmer[j] = read[i + j];
     }
 
-    map[kmer][day] += 1;
+    if (skip) continue;
+
+    PackedKMer packed_kmer;
+    pack_kmer(kmer, packed_kmer);
+
+    map[packed_kmer][day] += 1;
   }
 }
 
@@ -79,7 +135,7 @@ int main(int argc, char** argv) {
   int read_num = 0;
 
   Map map;
-  
+
   // This reads a FASTQ file under a few assumptions that happen to be true
   // with our data:
   //  - sequence is all one line, with no \n
@@ -106,7 +162,9 @@ int main(int argc, char** argv) {
   }
 
   for (auto i : map) {
-    printf("%." K_STR "s", i.first);
+    KMer kmer;
+    unpack_kmer(i.first, kmer);
+    printf("%." K_STR "s", kmer);
     for (int day = 0; day < DAYS; day++) {
       printf("\t%u", i.second[day]);
     }
