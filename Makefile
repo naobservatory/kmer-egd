@@ -1,4 +1,5 @@
 CFLAGS=-O3 -Wall -lrt -lm -Werror
+CPPFLAGS=-O3 -Wall -lrt -lm -Werror
 CC=gcc
 OUTPUTS=count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples \
   extract-kmers test shm-egd shm-dump-all trie-count fasta-to-ecs hash-count \

@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unordered_map>
+#include <cstdint>
+
 #include "superfasthash.h"
 
 #define K_4 10
@@ -11,6 +13,8 @@
 
 #define MAX_READ_LENGTH 151
 #define DAYS 14
+
+
 
 #define A 0
 #define C 1
@@ -66,13 +70,81 @@ namespace std {
   };
 }
 
-typedef std::unordered_map<PackedKMer, std::array<uint32_t, DAYS>> Map;
+#define COMPRESSED_COUNTS 1
+
+void* zmalloc(size_t size) {
+  void* m = malloc(size);
+  memset(m, 0, size);
+  return m;
+}
+
+#define extract_compressed_count(compressed_counts, index) ((compressed_counts >> (index*2+2)) & 0b11)
+
+class DayCounts {
+private:
+  // You could be fancy and store these in the same memory.
+  uint32_t* day_counts;
+  int64_t compressed_counts;
+    
+public:
+  DayCounts() {
+    day_counts = NULL;
+    compressed_counts = 0;
+  }
+  
+  void increment(int day) {
+    /*
+    printf("day: %d\n", day);
+    printf("before: ");
+    for (int i = 0; i < DAYS; i++) {
+      printf("%u, ", get(i));
+    }
+    printf("\n");
+    */
+    if (day_counts == NULL) {
+      if (extract_compressed_count(compressed_counts, day) != 0b11) {
+        //printf("compressed count: %lu\n",
+        //       extract_compressed_count(compressed_counts, day));
+        //printf("adding: %u\n", (1 << (day*2+2))+1);
+               
+        compressed_counts += (1 << (day*2+2));
+      } else {
+        day_counts = (uint32_t*)zmalloc(sizeof(uint32_t)*DAYS);
+        for (int i = 0 ; i < DAYS; i++) {
+          day_counts[i] = extract_compressed_count(compressed_counts, i);
+        }
+        day_counts[day]++;
+      }
+    } else {
+      if (day_counts[day] < UINT32_MAX) {
+        day_counts[day]++;
+      }
+    }
+    /*
+    printf("after:  ");
+    for (int i = 0; i < DAYS; i++) {
+      printf("%u, ", get(i));
+    }
+    printf("\n");
+    */
+  }
+
+  uint32_t get(int day) {
+    if (day_counts == NULL) {
+      return extract_compressed_count(compressed_counts, day);
+    } else {
+      return day_counts[day];
+    }
+  }
+};
+
+typedef std::unordered_map<PackedKMer, DayCounts> Map;
 
 void handle_read(char* read, int read_len, int day, Map& map,
                  char* kmer_include, char* kmer_exclude) {
   int poly_g_count = 0;
   for (int i = read_len; i > 0; i--) {
-    if (read[i] == 'G') {
+    if (read[i-1] == 'G') {
       poly_g_count++;
     }
   }
@@ -84,7 +156,7 @@ void handle_read(char* read, int read_len, int day, Map& map,
   }
 
   // Iterate over kmers in this read.
-  for (int i = 0; i < read_len - K + 1; i++) {
+  for (int i = 0; i < read_len - K; i++) {
     if (strncmp(read + i, kmer_include, K) < 0) continue;
     if (strncmp(read + i, kmer_exclude, K) >= 0) continue;
 
@@ -105,7 +177,7 @@ void handle_read(char* read, int read_len, int day, Map& map,
     PackedKMer packed_kmer;
     pack_kmer(kmer, packed_kmer);
 
-    map[packed_kmer][day] += 1;
+    map[packed_kmer].increment(day);
   }
 }
 
@@ -164,9 +236,9 @@ int main(int argc, char** argv) {
   for (auto i : map) {
     KMer kmer;
     unpack_kmer(i.first, kmer);
-    printf("%." K_STR "s", kmer);
+    printf("%." K_STR "s", kmer.data());
     for (int day = 0; day < DAYS; day++) {
-      printf("\t%u", i.second[day]);
+      printf("\t%u", i.second.get(day));
     }
     printf("\n");
   }

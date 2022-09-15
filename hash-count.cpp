@@ -72,7 +72,7 @@ void handle_read(char* read, int read_len, int day, Map& map,
                  char* kmer_include, char* kmer_exclude) {
   int poly_g_count = 0;
   for (int i = read_len; i > 0; i--) {
-    if (read[i] == 'G') {
+    if (read[i-1] == 'G') {
       poly_g_count++;
     }
   }
