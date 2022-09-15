@@ -84,7 +84,7 @@ class DayCounts {
 private:
   // You could be fancy and store these in the same memory.
   uint32_t* day_counts;
-  int64_t compressed_counts;
+  uint64_t compressed_counts;
     
 public:
   DayCounts() {
