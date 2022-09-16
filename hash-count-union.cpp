@@ -149,10 +149,8 @@ typedef std::unordered_map<PackedKMer, DayCounts> Map;
 void handle_read(char* read, int read_len, int day, Map& map,
                  char* kmer_include, char* kmer_exclude) {
   int poly_g_count = 0;
-  for (int i = read_len; i > 0; i--) {
-    if (read[i-1] == 'G') {
-      poly_g_count++;
-    }
+  for (int i = read_len - 1; i >> 0 && read[i] == 'G'; i--) {
+    poly_g_count++;
   }
   if (poly_g_count > 7) {
     read_len -= poly_g_count;
