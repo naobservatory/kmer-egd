@@ -165,6 +165,11 @@ void handle_read(char* read, int read_len, int day, Map& map,
   
   // Iterate over kmers in this read.
   for (int i = 0; i < read_len - K; i++) {
+    // Trim adapters: ignore any part of a read following this sequence.
+    // https://support.illumina.com/bulletins/2016/12/what-sequences-do-i-use-for-adapter-trimming.html
+    if (strncmp(read + i, "CTGTCTCTTATACACATCT", 19) == 0) break;
+
+    // Ignore any kmers that aren't in the region we're trying to test.
     if (strncmp(read + i, kmer_include, K) < 0) continue;
     if (strncmp(read + i, kmer_exclude, K) >= 0) continue;
 
