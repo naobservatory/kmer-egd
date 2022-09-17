@@ -223,6 +223,15 @@ int main(int argc, char** argv) {
 
   Map map;
 
+  // $ time aws s3 ls s3://prjna729801/  | grep AA..-40-14.tsv.gz | awk '{print
+  // $NF}' | xargs -P 32 -I {} bash -c "aws s3 cp s3://prjna729801/{} - |
+  // gunzip | wc -l > {}.tmp.allcount"
+  // $ cat *.allcount | awk '{sum+=$1}END{print sum}'
+  //  953683196
+  // But this is missing Kmers with lots of Gs, almost off by a factor of 2
+  // Let's try reserving 2B
+  map.reserve(2000000000L);
+  
   // This reads a FASTQ file under a few assumptions that happen to be true
   // with our data:
   //  - sequence is all one line, with no \n
