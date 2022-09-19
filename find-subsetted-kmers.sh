@@ -1,3 +1,5 @@
+# Usage: ./find-subsetted-kmers.sh sars-cov-2.fasta AC
+
 GENOME_FASTA="$1"
 PREFIX="$2"
 
@@ -12,5 +14,5 @@ cat rothman.unenriched_samples | \
     awk '{print $1}' | \
     xargs -P 32 -I {} bash -c "aws s3 cp s3://prjna729801/{} - | \
       gunzip | \
-      grep '${GREP_TARGET}' > \
-      {}.covid_matches"
+      grep -B 1 '${GREP_TARGET}' > \
+      {}.$PREFIX.covid_matches.fasta"
