@@ -4,9 +4,8 @@ import statsmodels.api as sm
 
 def start():
     days = None
-    #for line in [
-    #    "AAGAAGAGCAACAAGAAGAGCAACAAGAAGAGCAACAAGA "
-    #    "0 0 0 0 0 0 0 0 5 5 0 1 5 7".replace(" ", "\t")]:
+    #data = [
+    #    "CAACCTTTAAGCCATACCAATTAAGAGCTGTCTCTTATAC 19 24 21 26 21 24 22 26 13 22 28 22 27 26".replace(" ", "\t")]
 
     if len(sys.argv) > 1:
         data = ["\t".join(sys.argv[1:])]
@@ -50,12 +49,12 @@ def start():
         #    ci_width,
         #    line))
 
-        print("%s\t%.1f%%\t%.1f%%\t%.2E\t%.3f" % (
-            " ".join(str(x) for x in vals),
+        print("%.4e\t%.1f%%\t%.1f%%\t%.3f\t%s" % (
+            pvalue,
             coef*100,
             ci_025*100,
-            pvalue,
-            coef/ci_width))
+            coef/ci_width,
+            bucket))
 
         if len(sys.argv) > 1:
             import code

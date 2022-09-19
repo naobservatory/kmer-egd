@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
   for (auto i : map) {
     KMer kmer;
     unpack_kmer(i.first, kmer);
-    printf("%." K_STR "s", kmer);
+    printf("%." K_STR "s", kmer.data());
     for (int day = 0; day < DAYS; day++) {
       printf("\t%u", i.second[day]);
     }

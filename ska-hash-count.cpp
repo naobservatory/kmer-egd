@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
   }
 
   for (auto i : map) {
-    printf("%." K_STR "s", i.first);
+    printf("%." K_STR "s", i.first.data());
     for (int day = 0; day < DAYS; day++) {
       printf("\t%u", i.second[day]);
     }

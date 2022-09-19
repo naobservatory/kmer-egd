@@ -1,20 +1,17 @@
 import sys
-import random
 
-def start(days, initial, growth):
+def start(days, final, growth):
     days = int(days)
-    initial = int(initial)
+    final = int(final)
     growth = 1+float(growth)
 
-    # Make the output deterministic
-    random.seed(hash((days, initial, growth)))
-
-    val = initial
+    val = final
     out = []
     for _ in range(days):
         out.append(str(int(val)))
-        val *= growth
-
+        val /= growth
+    out.reverse()
+        
     print(" ".join(out))
 
 if __name__ == "__main__":
