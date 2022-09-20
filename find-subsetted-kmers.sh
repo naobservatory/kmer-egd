@@ -14,5 +14,5 @@ cat rothman.unenriched_samples | \
     awk '{print $1}' | \
     xargs -P 32 -I {} bash -c "aws s3 cp s3://prjna729801/{} - | \
       gunzip | \
-      grep -B 1 '${GREP_TARGET}' > \
+      grep -B 1 --no-group-separator '${GREP_TARGET}' > \
       {}.$HASH_DENOM.covid_matches.fasta"
