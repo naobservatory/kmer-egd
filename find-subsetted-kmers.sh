@@ -1,11 +1,10 @@
-# Usage: ./find-subsetted-kmers.sh sars-cov-2.fasta AC
+# Usage: ./find-subsetted-kmers.sh sars-cov-2.fasta 40
 
 GENOME_FASTA="$1"
-PREFIX="$2"
+HASH_DENOM="$2"
 
 GREP_TARGET=$(cat "${GENOME_FASTA}" | \
-    python3 to-kmers.py | \
-    grep "^$PREFIX" | \
+    python3 to-kmers.py "$HASH_DENOM" | \
     tr '\n' '|' | \
     sed 's/.$//' | \
     sed 's~|~\\|~g')
@@ -15,4 +14,4 @@ cat rothman.unenriched_samples | \
     xargs -P 32 -I {} bash -c "aws s3 cp s3://prjna729801/{} - | \
       gunzip | \
       grep -B 1 '${GREP_TARGET}' > \
-      {}.$PREFIX.covid_matches.fasta"
+      {}.$HASH_DENOM.covid_matches.fasta"
