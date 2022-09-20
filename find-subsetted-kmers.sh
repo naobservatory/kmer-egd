@@ -5,6 +5,7 @@ HASH_DENOM="$2"
 
 GREP_TARGET=$(cat "${GENOME_FASTA}" | \
     python3 to-kmers.py "$HASH_DENOM" | \
+    sort | \
     tr '\n' '|' | \
     sed 's/.$//' | \
     sed 's~|~\\|~g')
