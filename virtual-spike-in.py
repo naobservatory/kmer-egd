@@ -51,10 +51,10 @@ def start(genome_fname, qualities_fname, *read_counts):
                 kmers[read[i:i+K]][n_day] += 1
 
     for kmer, counts in sorted(kmers.items()):
-        #if sum(counts) < 10:
-        #    # no point in printing anything, since we won't detect exponential
-        #    # growth on this kmer and it just slows things down to try
-        #    continue
+        if sum(counts) < 20:
+            # no point in printing anything, since we won't detect exponential
+            # growth on this kmer and it just slows things down to try
+            continue
         print("%s\t%s" % (
             kmer, "\t".join([str(count) for count in counts])))
 
