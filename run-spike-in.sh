@@ -1,3 +1,5 @@
+# usage ./run-spike-in.sh 10 $(seq 100 100 1000)
+
 DAYS=$1
 shift
 VALS="$@"

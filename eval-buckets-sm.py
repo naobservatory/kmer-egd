@@ -19,8 +19,8 @@ def start():
         vals = [int(x) for x in vals]
 
         # Not worth running regression if we have too little data
-        if sum(vals) < 20:
-            continue
+        #if sum(vals) < 20:
+        #    continue
 
         if not days:
             days = [[day] for day in range(len(vals))]
