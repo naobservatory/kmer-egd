@@ -3,7 +3,7 @@ CPPFLAGS=-O3 -Wall -lrt -lm -Werror
 CC=gcc
 OUTPUTS=count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples \
   extract-kmers test shm-egd shm-dump-all trie-count fasta-to-ecs hash-count \
-  ska-hash-count hash-count-variable hash-count-union
+  ska-hash-count hash-count-variable hash-count-union hash-count-single
 TARGETS=$(OUTPUTS) .gitignore
 
 all: $(TARGETS)
@@ -35,6 +35,8 @@ hash-count: hash-count.cpp
 hash-count-variable: hash-count-variable.cpp
 
 hash-count-union: hash-count-union.cpp
+
+hash-count-single: hash-count-single.cpp
 
 ska-hash-count: ska-hash-count.cpp
 
