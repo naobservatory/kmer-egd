@@ -11,7 +11,8 @@ def start():
         data = ["\t".join(sys.argv[1:])]
     else:
         data = sys.stdin
-    
+
+    printed = False
     for line in data:
         line = line.strip()
         
@@ -55,10 +56,13 @@ def start():
             ci_025*100,
             coef/ci_width,
             bucket))
+        printed = True
 
         if len(sys.argv) > 1:
             import code
             code.interact(local=locals())
+    if not printed:
+        print("0 found nothing")
 
 if __name__ == "__main__":
     start()
