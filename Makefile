@@ -48,6 +48,8 @@ fasta-to-ecs: fasta-to-ecs.c
 	echo '\#*' >>  .gitignore
 	echo '\.#*' >>  .gitignore
 	echo '*.tsv' >>  .gitignore
+	echo '*.min-p' >>  .gitignore
+	echo 'SRR*.fasta' >>  .gitignore
 	echo '*tmp.*' >>  .gitignore
 	echo "bucket-evaluations*.tsv" >> .gitignore
 	echo "prjna729801.fnames.partitioned" >> .gitignore

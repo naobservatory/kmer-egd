@@ -12,10 +12,15 @@ trie-count
 fasta-to-ecs
 hash-count
 ska-hash-count
+hash-count-variable
+hash-count-union
+hash-count-single
 /target
 \#*
 \.#*
 *.tsv
+*.min-p
+SRR*.fasta
 *tmp.*
 bucket-evaluations*.tsv
 prjna729801.fnames.partitioned
