@@ -14,24 +14,24 @@ def start(days, daily_reads):
     days_arr_with_constant = sm.add_constant([[day] for day in range(days)])
 
 
-    n_kmer_types_to_occurrences = defaultdict(int)
+    n_kmer_types_to_tokens = defaultdict(int)
     with open("rothman.unenriched.counts") as inf:
         for line in inf:
-            n_kmer_types, occurrences_of_each =\
+            n_kmer_types, tokens_of_each =\
                 line.strip().split()
-            n_kmer_types_to_occurrences[int(occurrences_of_each)] += int(
+            n_kmer_types_to_tokens[int(tokens_of_each)] += int(
                 n_kmer_types)
 
-    total_occurrences = sum(n_kmer_types * occurrences_of_each
-                            for occurrences_of_each, n_kmer_types
-                            in n_kmer_types_to_occurrences.items())
+    total_tokens = sum(n_kmer_types * tokens_of_each
+                       for tokens_of_each, n_kmer_types
+                       in n_kmer_types_to_tokens.items())
 
     choices = []
     weights = []
-    for occurrences_of_each, n_kmer_types in \
-        n_kmer_types_to_occurrences.items():
+    for tokens_of_each, n_kmer_types in \
+        n_kmer_types_to_tokens.items():
 
-        choices.append(occurrences_of_each)
+        choices.append(tokens_of_each)
         weights.append(n_kmer_types)
 
     min_p = 1
@@ -43,10 +43,10 @@ def start(days, daily_reads):
 
     block = 1000
     for i in range(int(n_unique_kmers/block)):
-        for n, occurrences_of_each in enumerate(random.choices(
+        for n, tokens_of_each in enumerate(random.choices(
                 choices, weights, k=block)):
 
-            probability = occurrences_of_each/total_occurrences
+            probability = tokens_of_each/total_tokens
 
             if probability*daily_reads > 100:
                 continue # speed things up; not going to identify exponential growth
@@ -65,11 +65,11 @@ def start(days, daily_reads):
                 min_p = pvalue
                 min_coef = result.params[1]
                 min_vals = day_counts
-                min_choice = occurrences_of_each
+                min_choice = tokens_of_each
 
     daily_growth = (math.exp(min_coef)-1)*100
     print("%.2e\t%.2f%%\t%s/%s\t%s" % (
-        min_p, daily_growth, min_choice, total_occurrences, "\t".join(
+        min_p, daily_growth, min_choice, total_tokens, "\t".join(
             str(x) for x in min_vals)))
 
 if __name__ == "__main__":
