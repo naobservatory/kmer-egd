@@ -86,7 +86,7 @@ private:
   union {
     // Pretty sure punning a pointer with an int is undefined behavior, but
     // good enough for prototyping.
-    uint32_t* day_counts;
+    uint16_t* day_counts;
     uint64_t compressed_counts;
   };
     
@@ -114,14 +114,14 @@ public:
         compressed_counts += (1 << (day*2+4));
       } else {
         uint64_t saved_compressed_counts = compressed_counts;
-        day_counts = (uint32_t*)zmalloc(sizeof(uint32_t)*DAYS);
+        day_counts = (uint16_t*)zmalloc(sizeof(uint16_t)*DAYS);
         for (int i = 0 ; i < DAYS; i++) {
           day_counts[i] = extract_compressed_count(saved_compressed_counts, i);
         }
         day_counts[day]++;
       }
     } else {
-      if (day_counts[day] < UINT32_MAX) {
+      if (day_counts[day] < UINT16_MAX) {
         day_counts[day]++;
       }
     }
@@ -135,7 +135,7 @@ public:
     */
   }
 
-  uint32_t get(int day) {
+  uint16_t get(int day) {
     if (compressed_counts & COMPRESSED_COUNTS) {
       return extract_compressed_count(compressed_counts, day);
     } else {
@@ -148,25 +148,10 @@ typedef std::unordered_map<PackedKMer, DayCounts> Map;
 
 void handle_read(char* read, int read_len, int day, Map& map,
                  char* kmer_include, char* kmer_exclude) {
-  int poly_g_count = 0;
-  for (int i = read_len - 1; i >> 0 && read[i] == 'G'; i--) {
-    poly_g_count++;
-  }
-  if (poly_g_count > 7) {
-    read_len -= poly_g_count;
-  }
-  if (read_len == 0) {
-    return;
-  }
-
   std::unordered_set<PackedKMer> seen;
   
   // Iterate over kmers in this read.
   for (int i = 0; i < read_len - K; i++) {
-    // Trim adapters: ignore any part of a read following this sequence.
-    // https://support.illumina.com/bulletins/2016/12/what-sequences-do-i-use-for-adapter-trimming.html
-    if (strncmp(read + i, "CTGTCTCTTATACACATCT", 19) == 0) break;
-
     // Ignore any kmers that aren't in the region we're trying to test.
     if (strncmp(read + i, kmer_include, K) < 0) continue;
     if (strncmp(read + i, kmer_exclude, K) >= 0) continue;
