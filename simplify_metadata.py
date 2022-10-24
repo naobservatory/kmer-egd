@@ -1,4 +1,4 @@
-data = []
+data = set()
 
 with open("rothman.unenriched_samples") as inf:
     for line in inf:
@@ -11,7 +11,7 @@ with open("rothman.unenriched_samples") as inf:
         if len(year) == 2:
             year = '20%s' % year
 
-        data.append((wtp, "%s-%s-%s" % (
+        data.add((wtp, "%s-%s-%s" % (
             year, month.zfill(2), day.zfill(2)), fname))
 
 for wtp, date, fname in sorted(data):
