@@ -36,7 +36,7 @@ def eval_bucket(vals, days, bucket):
     result = model.fit()
     pvalue = result.pvalues[1]
 
-    if pvalue > 1e-5:
+    if pvalue > 1e-2:
         # Rough filtering to exclude most uninteresting output
         return False
 
