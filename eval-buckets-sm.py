@@ -2,67 +2,62 @@ import sys
 import math
 import statsmodels.api as sm
 
+def too_little_data(vals):
+    # Not worth running regression if we have too little data.  Need to see
+    # at least 10 instances, and at least four times total.
+    return sum(vals) < 5 or vals.count(0) > len(vals)-3
+
 def start():
     days = None
-    #data = [
-    #    "CAACCTTTAAGCCATACCAATTAAGAGCTGTCTCTTATAC 19 24 21 26 21 24 22 26 13 22 28 22 27 26".replace(" ", "\t")]
-
-    if len(sys.argv) > 1:
-        data = ["\t".join(sys.argv[1:])]
-    else:
-        data = sys.stdin
-
     printed = False
-    for line in data:
+    for line in sys.stdin:
         line = line.strip()
-        
+
         bucket, *vals = line.split('\t')
         vals = [int(x) for x in vals]
-
-        # Not worth running regression if we have too little data
-        if sum(vals) < 20:
-            continue
-
         if not days:
             days = [[day] for day in range(len(vals))]
 
-        model = sm.GLM(vals, sm.add_constant(days),
-                       family=sm.families.Poisson())
-        result = model.fit()
-        pvalue = result.pvalues[1]
-        coef = result.params[1]
-        ci_025, ci_975 = result.conf_int()[1]
-
-        # These are in log space; convert to percentage daily growth.
-        coef = math.exp(coef)-1
-        ci_025 = math.exp(ci_025)-1
-        ci_975 = math.exp(ci_975)-1
-        ci_width = ci_975 - ci_025
-
-        # Skip things that are decreasing
-        if coef < 0:
+        if too_little_data(vals):
             continue
-        
-        #print("%.2E\t%.3f\t%.3f\t%.3f\t%s" % (
-        #    pvalue,
-        #    coef,
-        #    ci_025,
-        #    ci_width,
-        #    line))
 
-        print("%.4e\t%.1f%%\t%.1f%%\t%.3f\t%s" % (
-            pvalue,
-            coef*100,
-            ci_025*100,
-            coef/ci_width,
-            bucket))
-        printed = True
+        for i in range(10, len(vals)):
+            printed = printed or eval_bucket(vals[:i+1], days[:i+1], bucket)
 
-        if len(sys.argv) > 1:
-            import code
-            code.interact(local=locals())
     if not printed:
-        print("0 found nothing")
+        print("1 found nothing")
+
+def eval_bucket(vals, days, bucket):
+    if too_little_data(vals):
+        return False
+
+    model = sm.GLM(vals, sm.add_constant(days),
+                   family=sm.families.Poisson())
+    result = model.fit()
+    pvalue = result.pvalues[1]
+
+    if pvalue > 1e-5:
+        # Rough filtering to exclude most uninteresting output
+        return False
+
+    coef = result.params[1]
+    ci_025, ci_975 = result.conf_int()[1]
+
+    # These are in log space; convert to percentage daily growth.
+    coef = math.exp(coef)-1
+    ci_025 = math.exp(ci_025)-1
+    ci_975 = math.exp(ci_975)-1
+    ci_width = ci_975 - ci_025
+
+    print("%.4e\t%.1f%%\t%.1f%%\t%.3f\t%s\t%s" % (
+        pvalue,
+        coef*100,
+        ci_025*100,
+        coef/ci_width,
+        len(vals),
+        bucket))
+
+    return True
 
 if __name__ == "__main__":
     start()
