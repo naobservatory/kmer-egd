@@ -15,6 +15,7 @@ ska-hash-count
 hash-count-variable
 hash-count-union
 hash-count-single
+hash-count-rothman
 /target
 \#*
 \.#*
