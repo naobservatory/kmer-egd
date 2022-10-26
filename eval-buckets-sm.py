@@ -1,44 +1,73 @@
 import sys
 import math
 import statsmodels.api as sm
+import dateutil.parser
 
 def too_little_data(vals):
     # Not worth running regression if we have too little data.  Need to see
-    # at least 10 instances, and at least four times total.
+    # at least five instances, and at least three times total.
     return sum(vals) < 5 or vals.count(0) > len(vals)-3
 
-def start():
-    days = None
-    printed = False
+def parse_metadata(wtp, metadata):
+    first_date = None
+
+    days = []
+
+    # file is sorted by days already
+    with open(metadata) as inf:
+        for line in inf:
+            fname, date, line_wtp, is_enriched = line.strip().split("\t")
+
+            # Metadata has both forward and reverse reads, but we just care
+            # about sample dates so ignore reverse reads
+            if not fname.endswith("_1.fastq.gz"): continue
+
+            # only looking at the specified wtp
+            if line_wtp != wtp: continue
+
+            # only considering unenriched data
+            if is_enriched != "0": continue
+
+            date = dateutil.parser.isoparse(date)
+
+            if first_date is None:
+                first_date = date
+
+            days.append([(date - first_date).days])
+
+    return days
+
+def start(wtp, metadata):
+    days = parse_metadata(wtp, metadata)
+
     for line in sys.stdin:
         line = line.strip()
 
         bucket, *vals = line.split('\t')
         vals = [int(x) for x in vals]
-        if not days:
-            days = [[day] for day in range(len(vals))]
+
+        if len(vals) != len(days):
+            raise Exception("vals too short: got %s expected %s" % (
+                len(vals), len(days)))
 
         if too_little_data(vals):
             continue
 
         for i in range(10, len(vals)):
-            printed = printed or eval_bucket(vals[:i+1], days[:i+1], bucket)
-
-    if not printed:
-        print("1 found nothing")
+            eval_bucket(vals[:i+1], days[:i+1], bucket)
 
 def eval_bucket(vals, days, bucket):
     if too_little_data(vals):
-        return False
+        return
 
     model = sm.GLM(vals, sm.add_constant(days),
                    family=sm.families.Poisson())
     result = model.fit()
     pvalue = result.pvalues[1]
 
-    if pvalue > 1e-2:
+    if pvalue > 1e-5:
         # Rough filtering to exclude most uninteresting output
-        return False
+        return
 
     coef = result.params[1]
     ci_025, ci_975 = result.conf_int()[1]
@@ -57,7 +86,5 @@ def eval_bucket(vals, days, bucket):
         len(vals),
         bucket))
 
-    return True
-
 if __name__ == "__main__":
-    start()
+    start(*sys.argv[1:])
