@@ -43,12 +43,14 @@ def start(wtp, metadata):
     for line in sys.stdin:
         line = line.strip()
 
+        if not line: continue
+
         bucket, *vals = line.split('\t')
         vals = [int(x) for x in vals]
 
         if len(vals) != len(days):
-            raise Exception("vals too short: got %s expected %s" % (
-                len(vals), len(days)))
+            raise Exception("vals too short: got %s expected %s for %r" % (
+                len(vals), len(days), line))
 
         if too_little_data(vals):
             continue
