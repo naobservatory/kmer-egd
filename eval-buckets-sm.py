@@ -77,14 +77,11 @@ def eval_bucket(vals, days, bucket):
     # These are in log space; convert to percentage daily growth.
     coef = math.exp(coef)-1
     ci_025 = math.exp(ci_025)-1
-    ci_975 = math.exp(ci_975)-1
-    ci_width = ci_975 - ci_025
 
-    print("%.4e\t%.1f%%\t%.1f%%\t%.3f\t%s\t%s" % (
+    print("%.4e\t%.1f%%\t%.1f%%\t%s\t%s" % (
         pvalue,
         coef*100,
         ci_025*100,
-        coef/ci_width,
         len(vals),
         bucket))
 
