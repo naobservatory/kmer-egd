@@ -64,7 +64,12 @@ def eval_bucket(vals, days, bucket):
 
     model = sm.GLM(vals, sm.add_constant(days),
                    family=sm.families.Poisson())
-    result = model.fit()
+    try:
+        result = model.fit()
+    except ValueError:
+        print("ERROR\t%s" % bucket)
+        return
+
     pvalue = result.pvalues[1]
 
     if pvalue > 1e-5:
