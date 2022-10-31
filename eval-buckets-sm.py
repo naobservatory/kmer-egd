@@ -48,17 +48,25 @@ def start(wtp, metadata):
         bucket, *vals = line.split('\t')
         vals = [int(x) for x in vals]
 
-        if len(vals) != len(days):
-            raise Exception("vals too short: got %s expected %s for %r" % (
-                len(vals), len(days), line))
 
         if too_little_data(vals):
             continue
 
         for i in range(10, len(vals)):
-            eval_bucket(vals[:i+1], days[:i+1], bucket)
+            result = eval_bucket(vals[:i+1], days[:i+1])
+            if not result: continue
+            
+            pvalue, coef, ci_025 = result
 
-def eval_bucket(vals, days, bucket):
+            print("%.4e\t%.1f%%\t%.1f%%\t%s\t%s" % (
+                pvalue,
+                coef*100,
+                ci_025*100,
+                i,
+                bucket))
+
+            
+def eval_bucket(vals, days):
     if too_little_data(vals):
         return
 
@@ -83,12 +91,7 @@ def eval_bucket(vals, days, bucket):
     coef = math.exp(coef)-1
     ci_025 = math.exp(ci_025)-1
 
-    print("%.4e\t%.1f%%\t%.1f%%\t%s\t%s" % (
-        pvalue,
-        coef*100,
-        ci_025*100,
-        len(vals),
-        bucket))
+    return pvalue, coef, ci_025
 
 if __name__ == "__main__":
     start(*sys.argv[1:])
