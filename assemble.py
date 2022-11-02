@@ -1,4 +1,5 @@
 import sys
+import re
 from collections import defaultdict, Counter
 from Bio import Align
 
@@ -12,13 +13,13 @@ def start(identity):
         if not contig:
             break
         print(contig)
-        removed = remove_close_matches(contig, lines)
+        pos_removed = remove_close_matches(contig, lines)
+        pos_removed.sort()
 
         with open("%s.%s" % (identity, index), "w") as outf:
-            for removal in removed:
-                # TODO(horizontal alignment)
-                outf.write("%s\n" % removal)
-                    
+            for pos, removal in pos_removed:
+                outf.write("%s%s\n" % (" "q*pos, removal))
+
         index += 1
 
 def rc(s):
@@ -26,7 +27,7 @@ def rc(s):
                     'G':'C',
                     'A':'T',
                     'C':'G'}[x] for x in reversed(s))
-        
+
 def assemble(lines):
     kmers = Counter()
     prv = defaultdict(Counter)
@@ -42,13 +43,13 @@ def assemble(lines):
 
     if not kmers:
         return None
-            
+
     (seed, seed_count), = kmers.most_common(1)
     return assemble_seed(seed, kmers, nxt, prv)
-            
+
 def assemble_seed(seed, kmers, nxt, prv):
     contig = seed
-    
+
     while True:
         kmer = contig[:K]
         if kmer not in prv: break
@@ -76,16 +77,22 @@ def remove_close_matches(contig, lines):
     aligner.internal_extend_gap_score = -2
 
     to_remove = set()
+    pos_remove = []
     for raw_line in lines:
         for line in [raw_line, rc(raw_line)]:
             alignment = aligner.align(contig, line)[0]
             score = alignment.score / len(line)
-            if score >= 2.5:
-                to_remove.add(raw_line)
+            if score < 2.5: continue
+
+            to_remove.add(raw_line)
+
+            seq1, _, seq2, _ = str(alignment).split('\n')
+            matches = re.findall("^-*", seq2)
+            pos = len(matches[0]) if matches else 0
+            pos_remove.append((pos, line))
 
     lines.difference_update(to_remove)
-    return to_remove
-        
+    return pos_remove
+
 if __name__ == "__main__":
     start(*sys.argv[1:])
-
