@@ -1,7 +1,6 @@
 import sys
 import re
 from collections import defaultdict, Counter
-from Bio import Align
 
 K=28
 
@@ -12,15 +11,24 @@ def start(identity):
         contig = assemble(lines)
         if not contig:
             break
-        print(contig)
         pos_removed = remove_close_matches(contig, lines)
         pos_removed.sort()
 
+        if not pos_removed:
+            break
+
         with open("%s.%s" % (identity, index), "w") as outf:
+            outf.write(contig + "\n")
             for pos, removal in pos_removed:
-                outf.write("%s%s\n" % (" "q*pos, removal))
+                outf.write("%s%s\n" % (" "*pos, removal))
 
         index += 1
+
+
+    if lines:
+        with open("%s.unmatched" % identity, "w") as outf:
+            for line in lines:
+                outf.write("%s\n" % line)
 
 def rc(s):
     return "".join({'T':'A',
@@ -66,30 +74,30 @@ def assemble_seed(seed, kmers, nxt, prv):
 
     return contig
 
-def remove_close_matches(contig, lines):
-    aligner = Align.PairwiseAligner()
-    # These are the scoring settings porechop uses by default.
-    # https://github.com/rrwick/Porechop/blob/master/porechop/porechop.py#L145
-    aligner.end_gap_score = 0
-    aligner.match_score = 3
-    aligner.mismatch_score = -6
-    aligner.internal_open_gap_score = -5
-    aligner.internal_extend_gap_score = -2
+def num_base_matches(s1, s2):
+    count = 0
+    for c1, c2 in zip(s1, s2):
+        if c1 == c2:
+            count += 1
+    return count
 
+def remove_close_matches(contig, lines):
     to_remove = set()
     pos_remove = []
     for raw_line in lines:
         for line in [raw_line, rc(raw_line)]:
-            alignment = aligner.align(contig, line)[0]
-            score = alignment.score / len(line)
-            if score < 2.5: continue
+            best_pos = None
+            best_score = 0
+            for pos in range(len(contig) - len(line) + 1):
+                score = num_base_matches(contig[pos : pos + len(line)], line)
+                if best_pos is None or score > best_score:
+                    best_pos = pos
+                    best_score = score
+
+            if best_score / len(line) < 0.9: continue
 
             to_remove.add(raw_line)
-
-            seq1, _, seq2, _ = str(alignment).split('\n')
-            matches = re.findall("^-*", seq2)
-            pos = len(matches[0]) if matches else 0
-            pos_remove.append((pos, line))
+            pos_remove.append((best_pos, line))
 
     lines.difference_update(to_remove)
     return pos_remove
