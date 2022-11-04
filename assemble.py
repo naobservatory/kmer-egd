@@ -13,6 +13,10 @@ def start(identity):
             count = int(count)
         else:
             count = 1
+
+        # trim poly-G tails, because we don't want "all G" to be the seed k-mer
+        line = re.sub("G{6,}$", "", line)
+
         lines[line] += count
 
     print("Assembling %s (%s reads)..." % (identity, len(lines)))
@@ -72,7 +76,8 @@ def assemble(lines):
             max_count = count
             kmer_max_count = kmer
 
-    return assemble_seed(kmer, nxt, prv)
+    print("  starting with %s" % kmer_max_count)
+    return assemble_seed(kmer_max_count, nxt, prv)
 
 def assemble_seed(seed, nxt, prv):
     contig = seed
@@ -113,7 +118,7 @@ def remove_close_matches(contig, lines):
                     best_pos = pos
                     best_score = score
 
-            if best_score / len(line) < 0.9: continue
+            if best_score / min(len(line), len(contig)) < 0.9: continue
 
             to_remove.add(raw_line)
             pos_remove.append((best_pos, line, count))
