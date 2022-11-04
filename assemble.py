@@ -5,57 +5,76 @@ from collections import defaultdict, Counter
 K=28
 
 def start(identity):
-    lines = set(line.strip() for line in sys.stdin)
+    lines = Counter()
+    for line in sys.stdin:
+        line = line.strip()
+        if '\t' in line:
+            count, line = line.split("\t")
+            count = int(count)
+        else:
+            count = 1
+        lines[line] += count
+
+    print("Assembling %s (%s reads)..." % (identity, len(lines)))
+
     index = 0
     while True:
         contig = assemble(lines)
         if not contig:
             break
         pos_removed = remove_close_matches(contig, lines)
-        pos_removed.sort()
-
         if not pos_removed:
             break
 
-        with open("%s.%s" % (identity, index), "w") as outf:
-            outf.write(contig + "\n")
-            for pos, removal in pos_removed:
-                outf.write("%s%s\n" % (" "*pos, removal))
+        with open("%s.%.3d" % (identity, index), "w") as outf:
+            outf.write("%.12d\t%s\n" % (
+                sum(count for _, _, count in pos_removed),
+                contig))
+            pos_removed.sort()
+            for pos, removal, count in pos_removed:
+                outf.write("%.12d\t%s%s\n" % (count, " "*pos, removal))
 
         index += 1
 
 
     if lines:
         with open("%s.unmatched" % identity, "w") as outf:
-            for line in lines:
-                outf.write("%s\n" % line)
+            for line, count in lines.items():
+                outf.write("%s\t%s\n" % (count, line))
 
 def rc(s):
     return "".join({'T':'A',
                     'G':'C',
                     'A':'T',
-                    'C':'G'}[x] for x in reversed(s))
+                    'C':'G',
+                    'N':'N'}[x] for x in reversed(s))
 
 def assemble(lines):
-    kmers = Counter()
     prv = defaultdict(Counter)
     nxt = defaultdict(Counter)
 
-    for raw_line in lines:
+    for raw_line, count in lines.items():
         for line in [raw_line, rc(raw_line)]:
             for i in range(1, len(line) - K):
                 kmer = line[i:i+K]
-                prv[kmer][line[i-1]] += 1
-                nxt[kmer][line[i+K]] += 1
-                kmers[kmer] += 1
+                prv[kmer][line[i-1]] += count
+                nxt[kmer][line[i+K]] += count
 
-    if not kmers:
+    if not prv:
         return None
 
-    (seed, seed_count), = kmers.most_common(1)
-    return assemble_seed(seed, kmers, nxt, prv)
+    # find most common kmer to use as seed
+    max_count = 0
+    kmer_max_count = None
+    for kmer, bases in prv.items():
+        count = sum(bases.values())
+        if count > max_count:
+            max_count = count
+            kmer_max_count = kmer
 
-def assemble_seed(seed, kmers, nxt, prv):
+    return assemble_seed(kmer, nxt, prv)
+
+def assemble_seed(seed, nxt, prv):
     contig = seed
 
     while True:
@@ -84,7 +103,7 @@ def num_base_matches(s1, s2):
 def remove_close_matches(contig, lines):
     to_remove = set()
     pos_remove = []
-    for raw_line in lines:
+    for raw_line, count in lines.items():
         for line in [raw_line, rc(raw_line)]:
             best_pos = None
             best_score = 0
@@ -97,9 +116,11 @@ def remove_close_matches(contig, lines):
             if best_score / len(line) < 0.9: continue
 
             to_remove.add(raw_line)
-            pos_remove.append((best_pos, line))
+            pos_remove.append((best_pos, line, count))
 
-    lines.difference_update(to_remove)
+    for raw_line in to_remove:
+        del lines[raw_line]
+
     return pos_remove
 
 if __name__ == "__main__":
