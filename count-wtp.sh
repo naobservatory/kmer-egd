@@ -3,10 +3,8 @@ for a in A C G T; do
         fname_out="s3://prjna729801/hc-HTP-$a$b.gz"
 
         if aws s3 ls "$fname_out" > /dev/null ; then
-            echo "already done"
             continue
         fi
-        echo "would do $a$b"
 
         time cat rothman.unenriched.simple | \
             awk -F '\t' '$NF=="HTP"{print $1"_1.fastq.gz\n"$1"_2.fastq.gz"}' | \
