@@ -6,6 +6,7 @@ for a in A C G T; do
             continue
         fi
 
+        echo "... $a$b"
         time cat rothman.unenriched.simple | \
             awk -F '\t' '$NF=="HTP"{print $1"_1.fastq.gz\n"$1"_2.fastq.gz"}' | \
             xargs -P1 -I {} aws s3 cp s3://prjna729801/{} - | \
