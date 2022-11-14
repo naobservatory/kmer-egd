@@ -56,6 +56,7 @@ fasta-to-ecs: fasta-to-ecs.c
 	echo '*tmp.*' >>  .gitignore
 	echo "bucket-evaluations*.tsv" >> .gitignore
 	echo "prjna729801.fnames.partitioned" >> .gitignore
+	echo "hc-HTP*" >> .gitignore
 
 .PHONY: clean
 
