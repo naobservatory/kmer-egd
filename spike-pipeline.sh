@@ -18,10 +18,9 @@ echo "Assembling spike contigs for each day..."
 ./assemble-spike-contigs.sh
 echo "Removing adapter spikes..."
 ./remove-adapter-spikes.sh
-
-#TODO
-
 echo "Finding matching reads..."
+./extract-spike-reads.sh
+#TODO
 echo "Preparing for display..."
 
 # extract-reads-matching-spike-kmers.py

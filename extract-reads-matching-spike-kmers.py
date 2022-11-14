@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import sys
 import glob
 
@@ -14,25 +16,27 @@ def rc(s):
                     'C':'G',
                     'N':'N'}[x] for x in reversed(s))
 
-for spike_contig_fname in glob.glob("hc-HTP-spike-contigs-%s.*" % day):
+for spike_contig_fname in glob.glob("hc-HTP-spike-contigs.%s.*" % day):
     suffix = spike_contig_fname.split(".")[-1]
     if suffix == "unmatched": continue
-    
+
     total = None
     with open(spike_contig_fname) as inf:
         for i, line in enumerate(inf):
             if i == 0:
                 count, contig = line.strip().split()
-                if int(count) < 10000:
-                    break
             else:
-                count, kmer = line.strip().split()
+                try:
+                    count, kmer = line.strip().split()
+                except ValueError:
+                    # expected from remove-adapter-spikes.py trimming
+                    continue
+
                 if K is None:
                     K = len(kmer)
-                else:
-                    if K != len(kmer):
-                        raise Exception("Bad K-mer length at %s:%s" % (
-                            spike_contig_fname, i))
+                elif K != len(kmer):
+                    # expected from remove-adapter-spikes.py trimming
+                    continue
                 kmers[kmer] = suffix
 
 # suffix -> file
@@ -44,7 +48,7 @@ for suffix in kmers.values():
 for lineno, line in enumerate(sys.stdin):
     if lineno % 100000 == 0:
         print("%s:%s..." % (day, lineno))
-    
+
     if not line or line[0] not in 'ACGT': continue
     line = line.strip()
     written = set()
@@ -56,5 +60,3 @@ for lineno, line in enumerate(sys.stdin):
                 files[suffix].write(line)
                 files[suffix].write("\n")
                 written.add(suffix)
-    
-    
