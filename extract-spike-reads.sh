@@ -1,5 +1,10 @@
 METADATA="rothman.unenriched.simple"
 for day in {00..20}; do
+    prefix=hc-HTP-spike-reads.$day
+    if ls $prefix.* &> /dev/null; then
+        continue
+    fi
+
     ACCESSION=$(cat $METADATA | \
                     grep HTP$ | \
                     cat -n | \
