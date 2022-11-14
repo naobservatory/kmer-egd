@@ -16,10 +16,11 @@ echo "Splitting spikes by day..."
 ./partition-spikes.sh
 echo "Assembling spike contigs for each day..."
 ./assemble-spike-contigs.sh
+echo "Removing adapter spikes..."
+./remove-adapter-spikes.sh
 
 #TODO
 
-echo "Filtering out adapter spikes..."
 echo "Finding matching reads..."
 echo "Preparing for display..."
 
