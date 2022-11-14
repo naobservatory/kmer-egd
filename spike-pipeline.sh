@@ -22,7 +22,7 @@ echo "Finding matching reads..."
 ./extract-spike-reads.sh
 echo "Combining outputs..."
 ./combine-spike-outputs.sh
-#TODO
+echo "Aligning reads back to contigs"
+./align-reads-to-contigs.sh
 echo "Preparing for display..."
-
-# extract-reads-matching-spike-kmers.py
+./display-all-reads.sh
