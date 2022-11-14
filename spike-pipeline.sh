@@ -20,6 +20,8 @@ echo "Removing adapter spikes..."
 ./remove-adapter-spikes.sh
 echo "Finding matching reads..."
 ./extract-spike-reads.sh
+echo "Combining outputs..."
+./combine-spike-outputs.sh
 #TODO
 echo "Preparing for display..."
 
