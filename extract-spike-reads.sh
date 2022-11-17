@@ -5,11 +5,15 @@ for day in {00..20}; do
         continue
     fi
 
+    if ! ls ${prefix/reads/contigs}.* &> /dev/null; then
+        echo "no contigs for day $day"
+        continue
+    fi
+
     ACCESSION=$(cat $METADATA | \
                     grep HTP$ | \
                     cat -n | \
                     awk '$1-1=='$day'{print $2}')
-    echo $day $ACCESSION
 
     (aws s3 cp s3://prjna729801/${ACCESSION}_1.fastq.gz - | \
          gunzip | \
