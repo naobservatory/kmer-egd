@@ -1,7 +1,7 @@
 for a in A C G T; do
     for b in A C G T; do
-        fname_in="s3://prjna729801/hc-HTP-$a$b.gz"
-        fname_out="s3://prjna729801/hc-HTP-$a$b.spikes.gz"
+        fname_in="s3://prjna729801/clean-HTP-$a$b.gz"
+        fname_out="s3://prjna729801/clean-HTP-$a$b.spikes.gz"
 
         if aws s3 ls "$fname_out" > /dev/null ; then
             continue

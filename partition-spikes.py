@@ -6,10 +6,6 @@ for line in sys.stdin:
     biggest_count, bucket, counts = line.strip().split(sep="\t", maxsplit=2)
     counts = counts.split("\t")
 
-for line in sys.stdin:
-    biggest_count, bucket, counts = line.strip().split(sep="\t", maxsplit=2)
-    counts = counts.split("\t")
-
     if not days:
         for _ in range(len(counts)):
             days.append([])

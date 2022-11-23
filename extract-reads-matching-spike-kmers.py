@@ -3,7 +3,7 @@
 import sys
 import glob
 
-day, parity = sys.argv[1:]
+day, = sys.argv[1:]
 
 kmers = {} # kmer -> contig
 
@@ -16,7 +16,7 @@ def rc(s):
                     'C':'G',
                     'N':'N'}[x] for x in reversed(s))
 
-for spike_contig_fname in glob.glob("hc-HTP-spike-contigs.%s.*" % day):
+for spike_contig_fname in glob.glob("clean-HTP-spike-contigs.%s.*" % day):
     suffix = spike_contig_fname.split(".")[-1]
     if suffix == "unmatched": continue
 
@@ -43,7 +43,7 @@ for spike_contig_fname in glob.glob("hc-HTP-spike-contigs.%s.*" % day):
 files = {}
 for suffix in kmers.values():
     if suffix not in files:
-        files[suffix] = open("hc-HTP-spike-reads.%s.%s.%s" % (day, parity, suffix), 'w')
+        files[suffix] = open("clean-HTP-spike-reads.%s.%s" % (day, suffix), 'w')
 
 for lineno, line in enumerate(sys.stdin):
     if lineno % 10000000 == 0:

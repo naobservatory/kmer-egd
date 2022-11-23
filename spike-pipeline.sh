@@ -8,6 +8,8 @@
 #    b. Align those reads to the contig
 #    c. Display them, with mismatching bases highlighted
 
+echo "Trimming adapters..."
+./trim-adapters.sh
 echo "Counting kmers..."
 ./count-wtp.sh
 echo "Finding spikes..."
@@ -16,12 +18,8 @@ echo "Splitting spikes by day..."
 ./partition-spikes.sh
 echo "Assembling spike contigs for each day..."
 ./assemble-spike-contigs.sh
-echo "Removing adapter spikes..."
-./remove-adapter-spikes.sh
 echo "Finding matching reads..."
 ./extract-spike-reads.sh
-echo "Combining outputs..."
-./combine-spike-outputs.sh
 echo "Aligning reads back to contigs"
 ./align-reads-to-contigs.sh
 echo "Preparing for display..."
