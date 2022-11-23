@@ -46,7 +46,7 @@ for suffix in kmers.values():
         files[suffix] = open("hc-HTP-spike-reads.%s.%s.%s" % (day, parity, suffix), 'w')
 
 for lineno, line in enumerate(sys.stdin):
-    if lineno % 100000 == 0:
+    if lineno % 10000000 == 0:
         print("%s:%s..." % (day, lineno))
 
     if not line or line[0] not in 'ACGT': continue
