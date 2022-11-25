@@ -17,6 +17,6 @@ for day in {00..20}; do
 
     aws s3 cp s3://prjna729801/${ACCESSION}.arclean.fastq.gz - | \
         gunzip | \
-        ./extract-reads-matching-spike-kmers.py $day 1 &
+        ./extract-reads-matching-spike-kmers.py $day &
 done
 wait
