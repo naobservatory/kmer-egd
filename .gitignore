@@ -25,4 +25,4 @@ SRR*.fasta
 *tmp.*
 bucket-evaluations*.tsv
 prjna729801.fnames.partitioned
-hc-HTP*
+clean-HTP*
