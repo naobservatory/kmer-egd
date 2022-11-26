@@ -34,7 +34,7 @@
 #define K (K_4*4)
 #define K_STR "40"
 
-#define MAX_READ_LENGTH 151
+#define MAX_READ_LENGTH 300
 #define MAX_DAYS 21
 #define ID_LEN 11  // ex: SRR14530899
 #define DATE_LEN 10  // ex: 2020-09-23
