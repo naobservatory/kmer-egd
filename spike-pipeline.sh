@@ -24,3 +24,5 @@ echo "Aligning reads back to contigs"
 ./align-reads-to-contigs.sh
 echo "Preparing for display..."
 ./display-all-reads.sh
+echo "Saving results..."
+./copy-results-to-s3.sh
