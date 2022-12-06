@@ -15,6 +15,6 @@ cat rothman.unenriched.simple | \
         echo $date $accession $(\
           cat $accession.dup-counts | \
              awk '$2==1{ones=$1}\
-                 {total+=$1}\
+                 {total+=($1*$2)}\
                  END{print(1-(ones/total))*100"%", (total-ones)"/"total}')
     done
