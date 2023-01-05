@@ -365,8 +365,8 @@ int main(int argc, char** argv) {
   }
 
   char* wtp = argv[1];
-  char* prefix= argv[2];
-  char* metadata= argv[3];
+  char* prefix = argv[2];
+  char* metadata_fname = argv[3];
 
   char kmer_include[K+1] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   char kmer_exclude[K+1] = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
@@ -387,7 +387,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  load_metadata(wtp, metadata);
+  load_metadata(wtp, metadata_fname);
 
   char b;
   char prev = '\n';
@@ -431,6 +431,7 @@ int main(int argc, char** argv) {
 
       int day;
       for (day = 0; day < days; day++) {
+        printf("%.11s vs %.11s\n", id, metadata + day*ID_LEN);
         if (strncmp(id, metadata + day*ID_LEN, ID_LEN) == 0) {
           break;
         }
