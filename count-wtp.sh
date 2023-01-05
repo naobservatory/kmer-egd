@@ -12,7 +12,7 @@ for a in A C G T; do
             xargs -P1 -I {} aws s3 cp s3://prjna729801/{} - | \
             gunzip | \
             sed -E 's/^@MT?_/@/' | \
-            ./hash-count-rothman HTP $a$b | \
+            ./hash-count-rothman HTP $a$b rothman.unenriched.simple | \
             gzip | \
             aws s3 cp - "$fname_out"
     done

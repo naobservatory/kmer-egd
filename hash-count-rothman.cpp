@@ -3,13 +3,12 @@
  * Usage:
  *
  *   cat *.fastq.gz | \
- *      hash-count-rothman HTP AA AT | \
- *      gzip > counts_HTP_AA-AT.gz
+ *      hash-count-rothman HTP AA rothman.unenriched.simple | \
+ *      gzip > counts_HTP_AA.gz
  *
  *
- * It reads the metadata from rothman.unenriched.simple and interprets the ID
- * lines in the input fastq to figure out which day this
- * input corresponds to.
+ * It reads the metadata from the file and interprets the ID lines in the input
+ * fastq to figure out which day this input corresponds to.
  *
  * The reason for k-mer prefixes is that otherwise we'd need too much memory to
  * store all the exact counts.
@@ -176,8 +175,8 @@ public:
 };
 
 // sets the globals metadata days
-void load_metadata(char* wtp) {
-  FILE* inf = fopen("rothman.unenriched.simple", "r");
+void load_metadata(char* wtp, char* metadata_fname) {
+  FILE* inf = fopen(metadata_fname, "r");
   if (inf == NULL) {
     perror("Can't open metadata");
     exit(1);
@@ -360,13 +359,14 @@ void test() {
 int main(int argc, char** argv) {
   test();  // So fast that we might as well do it every time.
 
-  if (argc != 3) {
-    fprintf(stderr, "usage: %s wtp prefix\n", argv[0]);
+  if (argc != 4) {
+    fprintf(stderr, "usage: %s wtp prefix metadata\n", argv[0]);
     return 1;
   }
 
   char* wtp = argv[1];
   char* prefix= argv[2];
+  char* metadata= argv[3];
 
   char kmer_include[K+1] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   char kmer_exclude[K+1] = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
@@ -387,7 +387,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  load_metadata(wtp);
+  load_metadata(wtp, metadata);
 
   char b;
   char prev = '\n';
