@@ -431,7 +431,7 @@ int main(int argc, char** argv) {
 
       int day;
       for (day = 0; day < days; day++) {
-        printf("%.11s vs %.11s\n", id, metadata + day*ID_LEN);
+        //printf("%.11s vs %.11s\n", id, metadata + day*ID_LEN);
         if (strncmp(id, metadata + day*ID_LEN, ID_LEN) == 0) {
           break;
         }
