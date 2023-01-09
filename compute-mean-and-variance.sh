@@ -24,3 +24,13 @@ for wtp in $(cat longest-timeseries.tsv | awk '{print $3}' | sort | uniq); do
         uniq | \
         aws s3 cp - "s3://prjna729801/clean-TS-$wtp-mv-uniq.gz"
 done
+
+for wtp in $(cat longest-timeseries.tsv | awk '{print $3}' | sort | uniq); do
+    cat <(aws s3 cp "s3://prjna729801/clean-TS-$wtp-A-mv.gz" - ) \
+        <(aws s3 cp "s3://prjna729801/clean-TS-$wtp-C-mv.gz" - ) \
+        <(aws s3 cp "s3://prjna729801/clean-TS-$wtp-G-mv.gz" - ) \
+        <(aws s3 cp "s3://prjna729801/clean-TS-$wtp-T-mv.gz" - ) | \
+        sort -n | \
+        uniq -c | \
+        aws s3 cp - "s3://prjna729801/clean-TS-$wtp-mv-uniq-c.gz"
+done
