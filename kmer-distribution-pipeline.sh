@@ -4,3 +4,5 @@ echo "Trimming adapters..."
 ./trim-consistent-timeseries.sh
 echo "Counting kmers..."
 ./count-consistent-timeseries.sh
+echo "Computing mean and variance..."
+./compute-mean-and-variance.sh
