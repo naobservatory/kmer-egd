@@ -131,7 +131,7 @@ while True:
     progress = sum(wtp_corr_count.values())
     if progress - last_progress_dump > DUMP_INTERVAL:
         with open(progress_file, "w") as outf:
-            outf.write(time.time())
+            outf.write("%d\n" % time.time())
             outf.write(get_status())
             outf.write("\n")
         last_progress_dump = progress
