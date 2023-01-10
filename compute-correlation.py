@@ -38,11 +38,11 @@ while True:
     all_count = 0
 
     means = []
-    
+
     for samples in all_samples:
         this_total = sum(samples)
         this_count = len(samples)
-        
+
         all_total += this_total
         all_count += this_count
 
@@ -79,14 +79,14 @@ while True:
                     wtp_mean = means[wtp_idx_1]
                     if not wtp_mean:
                         continue
-                
+
                     wtp_adjusted_1 = sample_1 - wtp_mean
                     wtp_adjusted_2 = sample_2 - wtp_mean
-                    
+
                     wtp_product = wtp_adjusted_1 * wtp_adjusted_2
                     wtp_mean_weighted = wtp_product / wtp_mean
                     wtp_mean2_weighted = wtp_mean_weighted / wtp_mean
-                    
+
                     wtp_corr_total_unweighted[key] += wtp_product
                     wtp_corr_total_mean_weighted[key] += wtp_mean_weighted
                     wtp_corr_total_mean2_weighted[key] += wtp_mean2_weighted
@@ -97,10 +97,6 @@ while True:
             nexts[i] = read_kmer(files[i])
 
     cur_kmer = min(x[0] for x in nexts)
-    
-    #FIXME, just for quick testing
-    if sum(wtp_corr_count.values()) > 100000:
-        break
 
 for key in sorted(global_corr_count):
     print("\t".join(
@@ -114,7 +110,3 @@ for key in sorted(global_corr_count):
         wtp_corr_total_mean_weighted[key],
         wtp_corr_total_mean2_weighted[key],
         wtp_corr_count[key]]))
-            
-            
-        
-
