@@ -83,11 +83,9 @@ while True:
     mean = all_total / all_count
 
     for wtp_idx_1, samples_1 in enumerate(all_samples):
-        # do want to include same-wtp comparision, but no need to do cross-wtp
-        # comparision twice
-        for wtp_idx_2, samples_2 in enumerate(all_samples[wtp_idx_1:]):
+        for wtp_idx_2, samples_2 in enumerate(all_samples):
             for sample_idx_1, sample_1 in enumerate(samples_1):
-                for sample_idx_2, sample_2 in enumerate(samples_2[sample_idx_1:]):
+                for sample_idx_2, sample_2 in enumerate(samples_2):
                     key = wtp_idx_1, wtp_idx_2, sample_idx_1, sample_idx_2
 
                     global_adjusted_1 = sample_1 - mean
