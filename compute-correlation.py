@@ -2,14 +2,25 @@
 
 import sys
 import gzip
+import time
 from collections import Counter
 
-fnames = sys.argv[1:]
+progress_file, prefix, *fnames = sys.argv[1:]
 files = [gzip.open(fname, "rt") for fname in fnames]
 
+DUMP_INTERVAL=10000000
+
 def read_kmer(f):
-    line = next(f)
-    kmer, samples = line.strip().split("\t", 1)
+    while True:
+        try:
+            line = next(f)
+        except StopIteration:
+            return None, None
+        kmer, samples = line.strip().split("\t", 1)
+
+        if kmer.startswith(prefix):
+            break
+
     samples = [int(x) for x in samples.split("\t")]
     return kmer, samples
 
@@ -25,6 +36,24 @@ wtp_corr_total_unweighted = Counter()
 wtp_corr_total_mean_weighted = Counter()
 wtp_corr_total_mean2_weighted = Counter()
 wtp_corr_count = Counter()
+
+last_progress_dump = 0
+
+def get_status():
+    rows = []
+    for key in sorted(global_corr_count):
+        rows.append("\t".join(
+            str(x) for x in [
+                "\t".join(str(y) for y in key),
+                global_corr_total_unweighted[key],
+                global_corr_total_mean_weighted[key],
+                global_corr_total_mean2_weighted[key],
+                global_corr_count[key],
+                wtp_corr_total_unweighted[key],
+                wtp_corr_total_mean_weighted[key],
+                wtp_corr_total_mean2_weighted[key],
+                wtp_corr_count[key]]))
+    return "\n".join(rows)
 
 while True:
     all_samples = []
@@ -96,17 +125,15 @@ while True:
         if samples:
             nexts[i] = read_kmer(files[i])
 
-    cur_kmer = min(x[0] for x in nexts)
+    if all(x[0] is None for x in nexts): break
+    cur_kmer = min(x[0] for x in nexts if x[0] is not None)
 
-for key in sorted(global_corr_count):
-    print("\t".join(
-        str(x) for x in [
-        "\t".join(str(y) for y in key),
-        global_corr_total_unweighted[key],
-        global_corr_total_mean_weighted[key],
-        global_corr_total_mean2_weighted[key],
-        global_corr_count[key],
-        wtp_corr_total_unweighted[key],
-        wtp_corr_total_mean_weighted[key],
-        wtp_corr_total_mean2_weighted[key],
-        wtp_corr_count[key]]))
+    progress = sum(wtp_corr_count.values())
+    if progress - last_progress_dump > DUMP_INTERVAL:
+        with open(progress_file, "w") as outf:
+            outf.write(time.time())
+            outf.write(get_status())
+            outf.write("\n")
+        last_progress_dump = progress
+
+print(get_status())
