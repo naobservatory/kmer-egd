@@ -11,6 +11,7 @@ for a in A C G T; do
             sort -n --parallel=32 --buffer-size=60G -T /run/kmer |
             gzip > /run/kmer/$fname_out
         rm /run/kmer/$fname_in
+        aws s3 cp /run/kmer/$fname_out s3://prjna729801/
     done
     echo "computing correlations for $a..."
     for b in A C G T; do
