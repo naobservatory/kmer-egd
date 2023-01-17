@@ -3,7 +3,7 @@
  * Usage:
  *
  *   cat *.fastq.gz | \
- *      hash-count-rothman HTP AA rothman.unenriched.simple | \
+ *      hash-count-rothman HTP AA rothman.unenriched.simple sampling_depth| \
  *      gzip > counts_HTP_AA.gz
  *
  *
@@ -41,6 +41,7 @@
 
 int days;
 char metadata[ID_LEN*MAX_DAYS];
+int depths[MAX_DAYS];
 
 #define A 0
 #define C 1
@@ -197,6 +198,7 @@ void load_metadata(char* wtp, char* metadata_fname) {
       for (int i = 0; i < ID_LEN; i++) {
         metadata[days*ID_LEN + i] = line[i];
       }
+      depths[days] = atoi(line + WTP_OFFSET + strlen(wtp) + 1);
       days++;
     }
   }
@@ -210,7 +212,7 @@ void load_metadata(char* wtp, char* metadata_fname) {
   }
 
   //for (int i = 0; i < days; i++) {
-  //  printf("%d: %.11s\n", i, metadata + (i*ID_LEN));
+  //  printf("%d: %.11s %d\n", i, metadata + (i*ID_LEN), depths[i]);
   //}
 }
 
@@ -220,6 +222,7 @@ typedef std::unordered_map<PackedKMer, DayCounts> Map;
 
 void handle_read(char* read, int read_len, int day, Map& map,
                  char* kmer_include, char* kmer_exclude) {
+
   std::unordered_set<PackedKMer> seen;
 
   // Iterate over kmers in this read.
@@ -359,14 +362,15 @@ void test() {
 int main(int argc, char** argv) {
   test();  // So fast that we might as well do it every time.
 
-  if (argc != 4) {
-    fprintf(stderr, "usage: %s wtp prefix metadata\n", argv[0]);
+  if (argc != 5) {
+    fprintf(stderr, "usage: %s wtp prefix metadata sampling_depth\n", argv[0]);
     return 1;
   }
 
   char* wtp = argv[1];
   char* prefix = argv[2];
   char* metadata_fname = argv[3];
+  int min_depth = atoi(argv[4]);
 
   char kmer_include[K+1] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   char kmer_exclude[K+1] = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
@@ -389,6 +393,14 @@ int main(int argc, char** argv) {
 
   load_metadata(wtp, metadata_fname);
 
+  long keep_thresholds[days];
+  for (int day = 0 ; day < days; day++) {
+    // Subsample by ignoring some reads to match the number of reads on the day
+    // where we have the fewest.
+    float keep_fraction = 1.0 * min_depth / depths[day];
+    keep_thresholds[day] = keep_fraction * RAND_MAX;
+  }
+  
   char b;
   char prev = '\n';
 
@@ -441,8 +453,10 @@ int main(int argc, char** argv) {
         exit(1);
       }
 
-      handle_read(read, seq_idx, day, map, kmer_include,
-                  kmer_exclude);
+      if (random() < keep_thresholds[day]) {
+        handle_read(read, seq_idx, day, map, kmer_include,
+                    kmer_exclude);
+      }
       seq_idx = 0;
     }
     prev = b;
