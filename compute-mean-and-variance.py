@@ -15,7 +15,7 @@ for line in sys.stdin:
     squared_errors = [(x - mean)*(x-mean) for x in vals]
     unbiased_variance = sum(squared_errors) / (n_vals-1)
 
-    counts["%.2e\t%.2e" % (mean, unbiased_variance)] += 1
+    counts["%.0f\t%.0f" % (sum(vals), unbiased_variance)] += 1
 
 for record, count in counts.items():
     print("%s\t%s" % (count, record))
