@@ -16,5 +16,5 @@ for wtp in $(cat longest-timeseries.tsv | awk '{print $3}' | sort | uniq); do
         "$SEQUENCE_FILE.$wtp.G.mvl" \
         "$SEQUENCE_FILE.$wtp.T.mvl" | \
         ./merge-per-prefix-counts.py \
-            > $"SEQUENCE_FILE.$wtp.uniq-c.mvl"
+            > "$SEQUENCE_FILE.$wtp.uniq-c.mvl"
 done
