@@ -5,10 +5,12 @@ METADATA=longest-timeseries.tsv
 SLUG=tbrv
 
 for accession in $(cat $METADATA | awk '{print $1}'); do
-    aws s3 cp s3://prjna729801/$accession.arclean.fastq.gz - | \
+    aws s3 cp s3://prjna729801/${accession}_1.fastq.gz - | \
         gunzip | \
         ./extract-reads-matching-seq.py $SEQ | \
-        gzip | \
-        aws s3 cp - s3://prjna729801/$accession.$SLUG.fasta.gz &
+        grep -c '^>' > $SLUG.$accession.count &
+    aws s3 cp s3://prjna729801/${accession}_1.fastq.gz - | \
+        gunzip | \
+        grep -c '@>' > all.$accession.count &
 done
 wait
