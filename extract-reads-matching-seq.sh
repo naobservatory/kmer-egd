@@ -11,6 +11,6 @@ for accession in $(cat $METADATA | awk '{print $1}'); do
         grep -c '^>' > $SLUG.$accession.count &
     aws s3 cp s3://prjna729801/${accession}_1.fastq.gz - | \
         gunzip | \
-        grep -c '@>' > all.$accession.count &
+        grep -c '^@' > all.$accession.count &
 done
 wait
