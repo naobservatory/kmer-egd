@@ -27,5 +27,6 @@ for title, seq, quality in FastqGeneralIterator(sys.stdin):
         kmer = seq[i:i+K]
         if kmer in to_match:
             print(">%s\n%s" % (title, seq))
+            break
                 
     
