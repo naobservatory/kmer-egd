@@ -14,17 +14,21 @@ if [ ! -e rothman.unenriched.lengths.simple ]; then
         done | tr ' ' '\t' > rothman.unenriched.lengths.simple
 fi
 
-cat rothman.unenriched.lengths.simple | \
-    ./find-best-timeseries.py > longest-timeseries.tsv
+if [ ! -e longest-timeseries.tsv ] ; then
+    cat rothman.unenriched.lengths.simple | \
+        ./find-best-timeseries.py > longest-timeseries.tsv
+fi
 
-cat longest-timeseries.tsv | \
-    awk '{print $1}' | \
-    xargs -P 32 -I {} bash -c \
-        "aws s3 cp s3://prjna729801/{}_1.fastq.gz - | \
-         gunzip | \
-         grep -c ^@ > {}.n_reads"
+if [ ! -e longest-timeseries-with-lengths.tsv ]; then
+  cat longest-timeseries.tsv | \
+      awk '{print $1}' | \
+      xargs -P 32 -I {} bash -c \
+          "aws s3 cp s3://prjna729801/{}_1.fastq.gz - | \
+           gunzip | \
+           grep -c ^@ > {}.n_reads"
 
-cat longest-timeseries.tsv | \
-    while read accession date wtp ; do
-        echo $accession $date $wtp $(cat $accession.n_reads)
-    done | tr ' ' '\t' > longest-timeseries-with-lengths.tsv
+  cat longest-timeseries.tsv | \
+      while read accession date wtp ; do
+          echo $accession $date $wtp $(cat $accession.n_reads)
+      done | tr ' ' '\t' > longest-timeseries-with-lengths.tsv
+fi
