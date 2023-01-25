@@ -17,4 +17,4 @@ done
 
 wait
 
-./merge-best-seeds.py
+./merge-best-seeds.py | tr ' ' '\t' > best-seeds.tsv
