@@ -37,14 +37,24 @@ new_contig = {}
 for loc, base in enumerate(contig):
     new_contig[loc] = base
 
-def get_base(vals):
+def get_base(vals, cautious=True):
     total = sum(vals.values())
     base, count = vals.most_common(1)[0]
 
-    if count < 100 or count / total < 0.5:
-        #print("Rejected: %s / %s = %.2f" % (count, total, count/total))
-        return None
-
+    # These rules could be a lot fancier.  The basic principle is that we'd get
+    # the most accuracy by adding only the single most confident base each
+    # time, but if we did this we'd need a very large number of iterations.
+    # But if we're confident enough about the bases we're adding, though, we
+    # can add dozens in a single iteration, making it *much* faster.
+    if cautious:
+        if count < 100 or count / total < 0.5:
+            #print("Rejected: %s / %s = %.2f" % (count, total, count/total))
+            return None
+    else:
+        if count < 10:
+            #print("Rejected: %s / %s = %.2f" % (count, total, count/total))
+            return None
+    
     return base
 
 for loc, vals in sorted(next_vals.items()):
@@ -61,10 +71,26 @@ for loc, vals in sorted(prev_vals.items()):
         
     new_contig[-loc - 1] = base
 
-new_contig = "".join(base for loc, base in sorted(new_contig.items()))
-print(new_contig)
+new_contig_str = "".join(base for loc, base in sorted(new_contig.items()))
 
-if new_contig == contig:
+if new_contig_str == contig:
+    # Try harder, maybe we can get past this spot.
+    # We only do this after gathering as many reads as we can.
+
+    if 0 in next_vals:
+        base = get_base(next_vals[0], cautious=False)
+        if base:
+            new_contig[len(contig) + 1] = base
+    if 0 in prev_vals:
+        base = get_base(prev_vals[0], cautious=False)
+        if base:
+            new_contig[-1] = base
+
+new_contig_str = "".join(base for loc, base in sorted(new_contig.items()))
+            
+print(new_contig_str)
+
+if new_contig_str == contig:
     sys.exit(42)
 else:
     sys.exit(0)
