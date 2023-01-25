@@ -13,16 +13,8 @@ best_kmers = {}
 # target -> best kmer count
 best_kmer_counts = Counter()
 
-def rc(s):
-    return "".join({'T':'A',
-                    'G':'C',
-                    'A':'T',
-                    'C':'G',
-                    'N':'N'}[x] for x in reversed(s))
-
 # target -> kmers
 target_kmers = {}
-
 # kmer -> target
 kmers_target = {}
 

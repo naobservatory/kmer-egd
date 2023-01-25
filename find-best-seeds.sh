@@ -16,3 +16,5 @@ for wtp in $(cat longest-timeseries.tsv | awk '{print $3}' | sort | uniq); do
 done
 
 wait
+
+./merge-best-seeds.py
