@@ -99,9 +99,9 @@ while need_next or need_prev:
             need_prev = False
 
 if contig == prev_contig:
-    out_prefix = "final"
+    out_prefix = "final_contig"
 else:
-    out_prefix = iteration + 1
+    out_prefix = "%s.contig" % (iteration + 1)
 
-with open("%s/%s.contig.seq" % (target, out_prefix), "w") as outf:
+with open("%s/%s.seq" % (target, out_prefix), "w") as outf:
     outf.write("%s\n" % contig)
