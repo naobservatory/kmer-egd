@@ -84,8 +84,6 @@ while need_next or need_prev:
                 end_pos = seq.index(end) + K
                 if end_pos < len(seq):
                     next_bases[seq[end_pos]] += 1
-
-    print(next_bases)
                     
     if need_next:
         next_base = get_base(next_bases)
@@ -93,7 +91,6 @@ while need_next or need_prev:
             contig = contig + next_base
         else:
             need_next = False
-            raise Exception("breakpoint")
     if need_prev:
         prev_base = get_base(prev_bases)
         if prev_base:

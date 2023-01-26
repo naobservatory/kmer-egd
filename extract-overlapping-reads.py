@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import os
 import sys
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 
@@ -34,9 +34,12 @@ files = {}
 with open(seeds_file) as inf:
     for line in inf:
         target = line.split(".fasta")[0]
+        target_seq_fname = "%s/%s.contig.seq" % (target, iteration)
+        if not os.path.exists(target_seq_fname):
+            continue
         files[target] = open(
             "%s/%s.%s.fasta" % (target, accession, iteration), "w")
-        with open("%s/%s.contig.seq" % (target, iteration)) as seqf:
+        with open(target_seq_fname) as seqf:
             contig, = seqf
             contig = contig.strip()
 
