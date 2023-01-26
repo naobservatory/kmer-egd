@@ -5,7 +5,11 @@ import glob
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 from collections import Counter, defaultdict
 
-iteration, contig = sys.argv[1:]
+iteration, contig, seed_count = sys.argv[1:]
+
+# seed_count is how prevalant the seed is in the data, and we use it to tune
+# our thresholds.
+seed_count = int(seed_count)
 
 # position relative to start of contig -> ACGT -> count
 # 0 = one before contig
@@ -37,7 +41,7 @@ new_contig = {}
 for loc, base in enumerate(contig):
     new_contig[loc] = base
 
-def get_base(vals, cautious=True):
+def get_base(vals, max_count):
     total = sum(vals.values())
     base, count = vals.most_common(1)[0]
 
@@ -46,45 +50,33 @@ def get_base(vals, cautious=True):
     # time, but if we did this we'd need a very large number of iterations.
     # But if we're confident enough about the bases we're adding, though, we
     # can add dozens in a single iteration, making it *much* faster.
-    if cautious:
-        if count < 100 or count / total < 0.5:
-            #print("Rejected: %s / %s = %.2f" % (count, total, count/total))
-            return None
-    else:
-        if count < 10:
-            #print("Rejected: %s / %s = %.2f" % (count, total, count/total))
-            return None
+    #
+    # The main idea is that once half the reads have dropped off we should
+    # rescan, and we should rescan earlier than that for tricky calls.
+    if (count < 5 or
+        count < max_count/2 or (
+            count < 0.85*max_count and count / total < 0.5)):
+        sys.stderr.write("Rejected (max_count=%s): %s / %s = %.2f\n" % (
+            max_count, count, total, count/total))
+        return None
     
     return base
 
-for loc, vals in sorted(next_vals.items()):
-    base = get_base(vals)
-    if not base:
-        break
-    
-    new_contig[len(contig) + 1 + loc] = base
+if 0 in next_vals:
+    max_next = sum(next_vals[0].values())
+    for loc, vals in sorted(next_vals.items()):
+        base = get_base(vals, max_next)
+        if not base:
+            break
+        new_contig[len(contig) + 1 + loc] = base
 
-for loc, vals in sorted(prev_vals.items()):
-    base = get_base(vals)
-    if not base:
-        break
-        
-    new_contig[-loc - 1] = base
-
-new_contig_str = "".join(base for loc, base in sorted(new_contig.items()))
-
-if new_contig_str == contig:
-    # Try harder, maybe we can get past this spot.
-    # We only do this after gathering as many reads as we can.
-
-    if 0 in next_vals:
-        base = get_base(next_vals[0], cautious=False)
-        if base:
-            new_contig[len(contig) + 1] = base
-    if 0 in prev_vals:
-        base = get_base(prev_vals[0], cautious=False)
-        if base:
-            new_contig[-1] = base
+if 0 in prev_vals:
+    max_prev = sum(prev_vals[0].values())
+    for loc, vals in sorted(prev_vals.items()):
+        base = get_base(vals, max_prev)
+        if not base:
+            break
+        new_contig[-loc - 1] = base
 
 new_contig_str = "".join(base for loc, base in sorted(new_contig.items()))
             

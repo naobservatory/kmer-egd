@@ -18,6 +18,8 @@ WORKDIR=$1
 shift
 SEED=$1
 shift
+COUNT=$1
+shift
 ACCESSIONS="$@"
 
 mkdir "$WORKDIR"
@@ -36,7 +38,7 @@ while true; do
              $SCRIPT_DIR/extract-overlapping-reads.py {} $CONTIG > \
              {}.$ITERATION.fasta"
       
-    CONTIG=$($SCRIPT_DIR/iterative-assembler.py $ITERATION $CONTIG)
+    CONTIG=$($SCRIPT_DIR/iterative-assembler.py $ITERATION $CONTIG $COUNT)
     if [ $? -eq 42 ]; then
         echo $CONTIG > final_contig.seq
         break
