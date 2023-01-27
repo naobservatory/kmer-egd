@@ -7,6 +7,7 @@ from Bio.SeqIO.QualityIO import FastqGeneralIterator
 accession, seeds_file = sys.argv[1:]
 
 K=40
+END_LENGTH=100
 
 def rc(s):
     return "".join({'T':'A',
@@ -50,9 +51,18 @@ with open(seeds_file) as inf:
             contig, = seqf
             contig = contig.strip()
 
-            # We want to extract every read with a k-mer matching this contig
-            for kmer in kmers(contig):
-                search_for(kmer, target)
+            # As we keep iterating the middle of the contig is eventually
+            # settled, and we only care about the ends. If it's a short contig,
+            # extract reads matching anywhere, but if it's a long contig
+            # extract only for the ends.
+            if len(contig) <= (END_LENGTH+K)*2:
+                for kmer in kmers(contig):
+                    search_for(kmer, target)
+            else:
+                for kmer in kmers(contig[:END_LENGTH+K]):
+                    search_for(kmer, target)
+                for kmer in kmers(contig[-(END_LENGTH+K):]):
+                    search_for(kmer, target)
 
 for title, seq, quality in FastqGeneralIterator(sys.stdin):
     targets = {} # target -> should_rc

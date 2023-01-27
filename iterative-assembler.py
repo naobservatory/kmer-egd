@@ -10,6 +10,7 @@ iteration = max(int(fname.split("/")[-1].split(".")[0])
                 for fname in glob.glob("%s/*.contig.seq" % target))
 
 K=40
+END_LENGTH=100
 
 with open("%s/%s.contig.seq" % (target, 0)) as inf:
     seed = inf.read().strip()
@@ -64,7 +65,10 @@ def get_base(vals):
 # Each time through the loop we look at every read, and if it matches either
 # the start or end of the contig we count the distribution of bases.  We take
 # the most common base, and keep going.
-contig = seed
+contig = prev_contig[END_LENGTH:-END_LENGTH]
+if len(contig) < len(seed):
+    contig = seed
+
 need_next = True
 need_prev = True
 while need_next or need_prev:
@@ -85,7 +89,7 @@ while need_next or need_prev:
                 end_pos = seq.index(end) + K
                 if end_pos < len(seq):
                     next_bases[seq[end_pos]] += 1
-                    
+
     if need_next:
         next_base = get_base(next_bases)
         if next_base:
