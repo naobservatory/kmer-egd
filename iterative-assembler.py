@@ -5,8 +5,9 @@ import glob
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 from collections import Counter, defaultdict
 
-iteration, target = sys.argv[1:]
-iteration = int(iteration)
+target, = sys.argv[1:]
+iteration = max(int(fname.split("/")[-1].split(".")[0])
+                for fname in glob.glob("%s/*.contig.seq" % target))
 
 K=40
 

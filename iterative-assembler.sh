@@ -25,27 +25,28 @@ mkdir iterative-assembly
 cd iterative-assembly
 
 cat $SEEDS | sed s/.fasta// | while read target count seed; do
-    mkdir $target
-    echo $seed > $target/0.contig.seq
+    if [ ! -e $target ]; then
+        mkdir $target
+        echo $seed > $target/0.contig.seq
+    fi
 done
 
 TARGETS=$(cat $SEEDS | sed 's/.fasta.*//')
 
-ITERATION=0
 while true; do
-    echo "Iteration $ITERATION, scanning..."
+    echo "Scanning..."
     echo $ACCESSIONS | \
         tr ' ' '\n' | \
         xargs -P 32 -I {} bash -c \
             "aws s3 cp s3://prjna729801/{}.arclean.fastq.gz - | \
              gunzip | \
-             $SCRIPT_DIR/extract-overlapping-reads.py {} $ITERATION $SEEDS"
+             $SCRIPT_DIR/extract-overlapping-reads.py {} $SEEDS"
     
     should_stop=true
     for target in $TARGETS; do
         if [ ! -e $target/final_contig.seq ]; then
             should_stop=false
-            $SCRIPT_DIR/iterative-assembler.py $ITERATION $target &
+            $SCRIPT_DIR/iterative-assembler.py $target &
         fi
     done
     if $should_stop; then
@@ -54,5 +55,4 @@ while true; do
         echo "Assembling..."
     fi
     wait
-    ITERATION=$(($ITERATION + 1))
 done

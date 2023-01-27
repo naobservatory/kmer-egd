@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import os
 import sys
+import glob
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 
-accession, iteration, seeds_file = sys.argv[1:]
+accession, seeds_file = sys.argv[1:]
 
 K=40
 
@@ -21,7 +22,7 @@ def search_for_rc(kmer, target, should_rc):
         to_find[kmer] = None, None
     else:
         to_find[kmer] = target, should_rc
-        
+
 def search_for(kmer, target):
     search_for_rc(kmer, target, False)
     search_for_rc(rc(kmer), target, True)
@@ -34,9 +35,15 @@ files = {}
 with open(seeds_file) as inf:
     for line in inf:
         target = line.split(".fasta")[0]
-        target_seq_fname = "%s/%s.contig.seq" % (target, iteration)
-        if not os.path.exists(target_seq_fname):
+
+        if os.path.exists("%s/final_contig.seq" % target):
             continue
+
+        iteration = max(int(fname.split("/")[-1].split(".")[0])
+                        for fname in glob.glob("%s/*.contig.seq" % target))
+
+        target_seq_fname = "%s/%s.contig.seq" % (target, iteration)
+
         files[target] = open(
             "%s/%s.%s.fasta" % (target, accession, iteration), "w")
         with open(target_seq_fname) as seqf:
@@ -60,5 +67,3 @@ for title, seq, quality in FastqGeneralIterator(sys.stdin):
                 ":rc" if should_rc else "",
                 rc(seq) if should_rc else seq,
             ))
-                
-    
