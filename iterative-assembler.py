@@ -75,6 +75,14 @@ while need_next or need_prev:
     start = contig[:K]
     end = contig[-K:]
 
+    # We currently don't have any way of assembling around loops of >K, so if
+    # we get to a kmer we've seen before just bail.
+    if start in contig[1:]:
+        need_prev = False
+    if end in contig[:-1]:
+        need_next = False
+
+
     next_bases = Counter()
     prev_bases = Counter()
 
