@@ -42,6 +42,7 @@ while true; do
              gunzip | \
              $SCRIPT_DIR/extract-overlapping-reads.py {} $SEEDS"
 
+    echo "Assembling..."
     should_stop=true
     for target in $TARGETS; do
         if [ ! -e $target/final_contig.seq ]; then
@@ -52,8 +53,6 @@ while true; do
     done
     if $should_stop; then
         break  # we stop once every sequence has finished
-    else
-        echo "Assembling..."
     fi
     wait
 done
