@@ -41,11 +41,12 @@ while true; do
             "aws s3 cp s3://prjna729801/{}.arclean.fastq.gz - | \
              gunzip | \
              $SCRIPT_DIR/extract-overlapping-reads.py {} $SEEDS"
-    
+
     should_stop=true
     for target in $TARGETS; do
         if [ ! -e $target/final_contig.seq ]; then
             should_stop=false
+            $SCRIPT_DIR/iterative-assembler-clean-up.py $target
             $SCRIPT_DIR/iterative-assembler.py $target &
         fi
     done
