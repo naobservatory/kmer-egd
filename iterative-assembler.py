@@ -38,8 +38,8 @@ for fname in glob.glob("%s/*.%s.fasta" % (target, iteration)):
             if prev_end in seq:
                 prev_end_count += 1
 
-def get_base(score_A, score_C, score_T, score_G):
-    total = score_A + score_C + score_T + score_G
+def get_base(score_A, score_C, score_G, score_T):
+    total = score_A + score_C + score_G + score_T
     if not total:
         return None
 
