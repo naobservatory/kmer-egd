@@ -4,7 +4,7 @@ CC=gcc
 OUTPUTS=count-kmer-eqs open-shm close-shm read-shm shm-hist shm-examples \
   extract-kmers test shm-egd shm-dump-all trie-count fasta-to-ecs hash-count \
   ska-hash-count hash-count-variable hash-count-union hash-count-single \
-  hash-count-rothman
+  hash-count-rothman iterative-assembler
 TARGETS=$(OUTPUTS) .gitignore
 
 all: $(TARGETS)
@@ -44,6 +44,8 @@ hash-count-single: hash-count-single.cpp
 ska-hash-count: ska-hash-count.cpp
 
 fasta-to-ecs: fasta-to-ecs.c
+
+iterative-assembler: iterative-assembler.c
 
 .gitignore:
 	echo $(OUTPUTS) | tr ' ' '\n' > .gitignore
