@@ -184,7 +184,7 @@ while need_next or need_prev:
         else:
             need_prev = False
 
-if contig == prev_contig:
+if len(contig) <= len(prev_contig):
     out_prefix = "final_contig"
 else:
     out_prefix = "%s.contig" % (iteration + 1)
