@@ -58,7 +58,9 @@ iterative-assembler: iterative-assembler.c
 	echo '*tmp.*' >>  .gitignore
 	echo "bucket-evaluations*.tsv" >> .gitignore
 	echo "prjna729801.fnames.partitioned" >> .gitignore
-	echo "clean-HTP*" >> .gitignore
+	echo "__pycache__" >> .gitignore
+	echo '*.log' >> .gitignore
+
 
 .PHONY: clean
 
